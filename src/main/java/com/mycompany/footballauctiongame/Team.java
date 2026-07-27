@@ -19,13 +19,14 @@ public class Team {
     private ArrayList<Player> squad;
 
     public Team(String teamName, Manager manager, double purse) {
+
         this.teamName = teamName;
         this.manager = manager;
         this.purse = purse;
         this.squad = new ArrayList<>();
+
     }
 
-    // Getters
     public String getTeamName() {
         return teamName;
     }
@@ -42,62 +43,70 @@ public class Team {
         return squad;
     }
 
-    // Setters
     public void setPurse(double purse) {
         this.purse = purse;
     }
 
-    // Add player to team
-    public void buyPlayer(Player player, double bidAmount) {
-
-        purse -= bidAmount;
-
-        player.setSold(true);
-        player.setCurrentBid(bidAmount);
-        player.setWinningTeam(this);
-
-        squad.add(player);
-    }
-
-    // Check if team can afford a bid
     public boolean canBid(double amount) {
         return purse >= amount;
     }
 
-    // Display squad
-    public void showSquad() {
+    public void buyPlayer(Player player, double price) {
 
-        System.out.println("\n==============================");
-        System.out.println("Team : " + teamName);
-        System.out.println("Manager : " + manager.getName());
-        System.out.println("Remaining Purse : " + purse);
-        System.out.println("------------------------------");
+        purse -= price;
 
-        if (squad.isEmpty()) {
-            System.out.println("No Players Purchased.");
-        } else {
+        squad.add(player);
 
-            for (Player p : squad) {
+        player.setWinningTeam(this);
 
-                System.out.println(
-                        p.getName()
-                        + " ("
-                        + p.getPosition()
-                        + ") - "
-                        + p.getCurrentBid());
+        player.setSold(true);
 
-            }
+        player.setCurrentBid(price);
+
+    }
+
+    public String getPlayerNames() {
+
+    if (squad.isEmpty()) {
+        return "";
+    }
+
+    StringBuilder players = new StringBuilder();
+
+    for (Player player : squad) {
+
+        players.append(player.getName())
+               .append("        ")
+               .append(player.getCurrentBid())
+               .append("\n");
+
+    }
+
+    return players.toString();
+
+}
+
+    public double getTotalSquadValue() {
+
+        double total = 0;
+
+        for (Player player : squad) {
+
+            total += player.getCurrentBid();
 
         }
 
-        System.out.println("==============================");
+        return total;
+
     }
-    public void showTeamInfo() {
 
-    System.out.println("---------------------------");
-    System.out.println("Team : " + teamName);
-    System.out.println("Purse : " + purse);
-    System.out.println("---------------------------");
+    @Override
+    public String toString() {
 
-}
+        return teamName +
+                " | Manager: " + manager.getName() +
+                " | Purse: " + purse;
+
+    }
+
 }

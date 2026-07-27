@@ -8,11 +8,9 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-
 public class Manager extends Person {
 
     private String teamName;
-
     public Manager(String name, String teamName) {
         super(name);
         this.teamName = teamName;
@@ -27,8 +25,12 @@ public class Manager extends Person {
     }
 
     @Override
-    public void displayInfo() {
-        System.out.println("Manager : " + getName());
-        System.out.println("Team    : " + teamName);
+    public String getRole() {
+        return "Manager";
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " (" + teamName + ")";
     }
 }

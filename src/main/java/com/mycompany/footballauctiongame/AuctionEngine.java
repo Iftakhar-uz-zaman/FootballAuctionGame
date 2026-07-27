@@ -10,237 +10,254 @@ package com.mycompany.footballauctiongame;
  */
 
 import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.ArrayList;
+
 public class AuctionEngine {
-    private ArrayList<Team> activeTeams;
-    private Bid currentBid;
+
     private ArrayList<Player> players;
     private ArrayList<Team> teams;
-    private Scanner input;
 
-    public AuctionEngine(ArrayList<Player> players,
-                         ArrayList<Team> teams) {
+    private int currentPlayerIndex;
+    private int currentTeamIndex;
+    private int passCount;
+
+    private Player currentPlayer;
+    private Bid currentBid;
+
+    public AuctionEngine(ArrayList<Player> players, ArrayList<Team> teams) {
 
         this.players = players;
         this.teams = teams;
-        input = new Scanner(System.in);
 
-    }
-    private void initializeActiveTeams() {
+        currentPlayerIndex = 0;
+        currentTeamIndex = 0;
+        passCount = 0;
 
-    activeTeams = new ArrayList<>();
+        if (!players.isEmpty()) {
 
-    for (Team t : teams) {
-        activeTeams.add(t);
-    }
+            currentPlayer = players.get(0);
 
-}
-    private boolean auctionFinished() {
-
-    return activeTeams.size() <= 1;
-
-}
-    private void pass(Team team) {
-
-    activeTeams.remove(team);
-
-}
-    private void placeBid(Team team, double amount) {
-
-    currentBid.setAmount(amount);
-
-    currentBid.setBidder(team);
-
-}
-    private void sellPlayer(Player player) {
-
-    Team winner = currentBid.getBidder();
-
-    if (winner == null) {
-
-        System.out.println(player.getName() + " UNSOLD");
-
-        return;
-    }
-
-    winner.buyPlayer(player, currentBid.getAmount());
-
-    System.out.println("\n***********************");
-    System.out.println("SOLD!");
-    System.out.println(player.getName());
-
-    System.out.println("Team : "
-            + winner.getTeamName());
-
-    System.out.println("Price : "
-            + currentBid.getAmount());
-
-    System.out.println("***********************");
-
-}
-    
-    // Display all teams
-    public void showTeams() {
-
-        System.out.println("\n========== Teams ==========");
-
-        for (int i = 0; i < teams.size(); i++) {
-
-            Team t = teams.get(i);
-
-            System.out.println((i + 1) + ". "
-                    + t.getTeamName()
-                    + " | Purse : "
-                    + t.getPurse());
+            currentBid = new Bid(
+                    null,
+                    currentPlayer.getBasePrice()
+            );
 
         }
 
     }
 
-    // Update purse before auction
-    public void updatePurse() {
-
-        System.out.println("\nUpdate Team Purse");
-
-        for (Team t : teams) {
-
-            System.out.print(
-                    t.getTeamName()
-                    + " New Purse : ");
-
-            double purse = input.nextDouble();
-
-            t.setPurse(purse);
-
-        }
-
-    }
-    public void startAuction() {
-
-    for(Player player : players){
-
-        auctionPlayer(player);
-
+    public Player getCurrentPlayer() {
+        return currentPlayer;
     }
 
-    System.out.println("\nAuction Finished.");
+    public Bid getCurrentBid() {
+        return currentBid;
     }
-    private void auctionPlayer(Player player) {
 
-    initializeBid(player);
-    initializeActiveTeams();
+    public Team getCurrentTeam() {
+        return teams.get(currentTeamIndex);
+    }
 
-    while (!auctionFinished()) {
+    public ArrayList<Team> getTeams() {
+        return teams;
+    }
 
-        // Use a copy because activeTeams may change while looping
-        ArrayList<Team> currentRound = new ArrayList<>(activeTeams);
+    public boolean auctionFinished() {
+        return currentPlayerIndex >= players.size();
+    }
 
-        for (Team team : currentRound) {
+    private void nextTeam() {
 
-            if (!activeTeams.contains(team))
-                continue;
+        currentTeamIndex++;
 
-            showAuctionStatus(player);
-
-            System.out.println("\nTeam : " + team.getTeamName());
-            System.out.println("Remaining Purse : " + team.getPurse());
-
-            System.out.println("\n1. Increase Bid (+5)");
-            System.out.println("2. Increase Bid (+10)");
-            System.out.println("3. Increase Bid (+20)");
-            System.out.println("4. Pass");
-
-            System.out.print("Choice : ");
-
-            int choice = input.nextInt();
-
-            if (choice == 4) {
-
-                pass(team);
-
-                System.out.println(team.getTeamName() + " Passed.");
-
-                continue;
-            }
-
-            double increase = 0;
-
-            switch (choice) {
-
-                case 1:
-                    increase = 5;
-                    break;
-
-                case 2:
-                    increase = 10;
-                    break;
-
-                case 3:
-                    increase = 20;
-                    break;
-
-                default:
-                    System.out.println("Invalid Choice.");
-                    continue;
-
-            }
-
-            double newBid = currentBid.getAmount() + increase;
-
-            if (!team.canBid(newBid)) {
-
-                System.out.println("Insufficient Purse.");
-                pass(team);
-
-                continue;
-
-            }
-
-            placeBid(team, newBid);
-
-            System.out.println(team.getTeamName()
-                    + " bids "
-                    + newBid);
-
+        if (currentTeamIndex >= teams.size()) {
+            currentTeamIndex = 0;
         }
 
     }
 
-    sellPlayer(player);
+    public boolean bid() {
 
-}
-    private void initializeBid(Player player) {
+        Team team = getCurrentTeam();
 
-    currentBid = new Bid(null, player.getBasePrice());
+        double nextPrice = currentBid.getAmount() + 10;
 
-}
-    private void showAuctionStatus(Player player) {
+        if (!team.canBid(nextPrice)) {
 
-    System.out.println("\n==============================");
+            javax.swing.JOptionPane.showMessageDialog(
+        null,
+        team.getTeamName() + " does not have enough purse.",
+        "Insufficient Funds",
+        javax.swing.JOptionPane.WARNING_MESSAGE
+);
 
-    System.out.println("Player : " + player.getName());
+            nextTeam();
 
-    System.out.println("Position : " + player.getPosition());
+            return false;
 
-    System.out.println("Overall : " + player.getOverall());
+        }
 
-    System.out.println("Current Bid : " + currentBid.getAmount());
+        currentBid.increaseBid();
 
-    if(currentBid.getBidder()==null){
+        currentBid.setBidder(team);
 
-        System.out.println("Highest Bidder : None");
+        currentPlayer.setCurrentBid(currentBid.getAmount());
+
+        currentPlayer.setWinningTeam(team);
+
+        passCount = 0;
+
+        nextTeam();
+
+        return true;
 
     }
 
-    else{
+    public boolean pass() {
 
-        System.out.println("Highest Bidder : "
-                + currentBid.getBidder().getTeamName());
+        passCount++;
+
+        // Everyone passed without any bid
+        if (passCount >= teams.size()
+                && currentBid.getBidder() == null) {
+
+            System.out.println(currentPlayer.getName()
+                    + " remained UNSOLD.");
+
+            nextPlayer();
+
+            return true;
+
+        }
+
+        // Everyone except highest bidder passed
+        if (currentBid.getBidder() != null
+                && passCount >= teams.size() - 1) {
+
+            sellPlayer();
+
+            return true;
+
+        }
+
+        nextTeam();
+
+        return false;
 
     }
 
-    System.out.println("==============================");
+    private void sellPlayer() {
 
-}
+        Team winner = currentBid.getBidder();
+
+        if (winner != null) {
+
+            winner.buyPlayer(
+                    currentPlayer,
+                    currentBid.getAmount()
+            );
+
+            System.out.println();
+
+            javax.swing.JOptionPane.showMessageDialog(
+        null,
+        currentPlayer.getName()
+        + "\nSold To : "
+        + winner.getTeamName()
+        + "\nPrice : "
+        + currentBid.getAmount(),
+        "Player Sold",
+        javax.swing.JOptionPane.INFORMATION_MESSAGE
+);
+
+            System.out.println("Player : "
+                    + currentPlayer.getName());
+
+            System.out.println("Winner : "
+                    + winner.getTeamName());
+
+            System.out.println("Price : "
+                    + currentBid.getAmount());
+
+            TextFileManager.saveTeams(teams);
+
+        }
+
+        nextPlayer();
+
+    }
+
+    private void nextPlayer() {
+
+        currentPlayerIndex++;
+
+        if (currentPlayerIndex >= players.size()) {
+
+            currentPlayer = null;
+
+            currentBid = null;
+
+            return;
+
+        }
+
+        currentPlayer = players.get(currentPlayerIndex);
+
+        currentBid = new Bid(
+                null,
+                currentPlayer.getBasePrice()
+        );
+
+        currentTeamIndex = 0;
+
+        passCount = 0;
+
+    }
+
+    public void showCurrentPlayer() {
+
+        if (currentPlayer == null) {
+
+            System.out.println("Auction Finished!");
+
+            return;
+
+        }
+
+        System.out.println("-----------------------------------");
+
+        System.out.println("Player : "
+                + currentPlayer.getName());
+
+        System.out.println("Position : "
+                + currentPlayer.getPosition());
+
+        System.out.println("Overall : "
+                + currentPlayer.getOverall());
+
+        System.out.println("Base Price : "
+                + currentPlayer.getBasePrice());
+
+        System.out.println("Current Bid : "
+                + currentBid.getAmount());
+
+        if (currentBid.getBidder() == null) {
+
+            System.out.println("Highest Bidder : None");
+
+        } else {
+
+            System.out.println("Highest Bidder : "
+                    + currentBid.getBidder().getTeamName());
+
+        }
+
+        System.out.println();
+
+        System.out.println("Current Turn : "
+                + getCurrentTeam().getTeamName());
+
+        System.out.println("-----------------------------------");
+
+    }
+
 }

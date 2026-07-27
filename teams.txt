@@ -1,0 +1,6 @@
+rt|yu|529.0|Haaland        160.0
+Pedri        100.0
+
+f|n|439.0|Messi        190.0
+Cristiano Ronaldo        160.0
+

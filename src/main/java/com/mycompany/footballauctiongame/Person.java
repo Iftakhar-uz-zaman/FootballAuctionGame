@@ -25,5 +25,5 @@ public abstract class Person {
         this.name = name;
     }
 
-    public abstract void displayInfo();
+    public abstract String getRole();
 }

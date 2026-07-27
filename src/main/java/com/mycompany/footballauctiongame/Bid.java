@@ -14,6 +14,11 @@ public class Bid {
     private Team bidder;
     private double amount;
 
+    public Bid() {
+        bidder = null;
+        amount = 0;
+    }
+
     public Bid(Team bidder, double amount) {
         this.bidder = bidder;
         this.amount = amount;
@@ -23,16 +28,38 @@ public class Bid {
         return bidder;
     }
 
-    public double getAmount() {
-        return amount;
-    }
-
     public void setBidder(Team bidder) {
         this.bidder = bidder;
+    }
+
+    public double getAmount() {
+        return amount;
     }
 
     public void setAmount(double amount) {
         this.amount = amount;
     }
-    
+
+    // Method Overloading
+    public void increaseBid() {
+        amount += 10;
+    }
+
+    public void increaseBid(double increment) {
+        amount += increment;
+    }
+
+    @Override
+    public String toString() {
+
+        if (bidder == null) {
+            return "Current Bid: " + amount + " | No Highest Bidder";
+        }
+
+        return "Current Bid: " + amount +
+               " | Highest Bidder: " +
+               bidder.getTeamName();
+    }
 }
+
+   

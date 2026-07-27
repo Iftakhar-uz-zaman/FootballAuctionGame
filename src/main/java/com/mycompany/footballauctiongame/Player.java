@@ -17,21 +17,23 @@ public class Player {
     private int overall;
     private double basePrice;
     private double currentBid;
-    private boolean sold;
     private Team winningTeam;
+    private boolean sold;
 
-    public Player(int id, String name, String position, int overall, double basePrice) {
+    public Player(int id, String name, String position,
+                  int overall, double basePrice) {
+
         this.id = id;
         this.name = name;
         this.position = position;
         this.overall = overall;
         this.basePrice = basePrice;
+
         this.currentBid = basePrice;
-        this.sold = false;
         this.winningTeam = null;
+        this.sold = false;
     }
 
-    // Getters
     public int getId() {
         return id;
     }
@@ -56,42 +58,44 @@ public class Player {
         return currentBid;
     }
 
-    public boolean isSold() {
-        return sold;
-    }
-
     public Team getWinningTeam() {
         return winningTeam;
     }
 
-    // Setters
-    public void setCurrentBid(double currentBid) {
-        this.currentBid = currentBid;
+    public boolean isSold() {
+        return sold;
     }
 
-    public void setSold(boolean sold) {
-        this.sold = sold;
+    public void setCurrentBid(double currentBid) {
+        this.currentBid = currentBid;
     }
 
     public void setWinningTeam(Team winningTeam) {
         this.winningTeam = winningTeam;
     }
 
-    public void displayPlayer() {
-        System.out.println("----------------------------");
-        System.out.println("ID          : " + id);
-        System.out.println("Name        : " + name);
-        System.out.println("Position    : " + position);
-        System.out.println("Overall     : " + overall);
-        System.out.println("Base Price  : " + basePrice);
+    public void setSold(boolean sold) {
+        this.sold = sold;
+    }
 
-        if (sold) {
-            System.out.println("Current Bid : " + currentBid);
-            System.out.println("Sold To     : " + winningTeam.getTeamName());
-        } else {
-            System.out.println("Status      : Unsold");
-        }
+    // Method Overloading
+    public void resetBid() {
+        currentBid = basePrice;
+        winningTeam = null;
+    }
 
-        System.out.println("----------------------------");
+    public void resetBid(double startingPrice) {
+        currentBid = startingPrice;
+        winningTeam = null;
+    }
+
+    @Override
+    public String toString() {
+
+        return id + ". " + name +
+                " | " + position +
+                " | OVR " + overall +
+                " | Base Price: " + basePrice;
+
     }
 }
