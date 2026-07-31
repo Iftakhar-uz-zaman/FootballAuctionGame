@@ -1,6 +1,10 @@
-rt|yu|529.0|Haaland        160.0
-Pedri        100.0
+FCB|Ifty|690.0|Messi        210.0
 
-f|n|439.0|Messi        190.0
-Cristiano Ronaldo        160.0
+RM|Omi|110.0|Haaland        250.0
+Pedri        170.0
+Cristiano Ronaldo        240.0
+Kevin De Bruyne        130.0
 
+PSG|Jarif|780.0|Vinicius Jr        120.0
+
+MUN|Jim|900.0|

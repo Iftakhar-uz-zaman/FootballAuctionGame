@@ -4,6 +4,9 @@
  */
 package com.mycompany.footballauctiongame;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 /**
  *
  * @author Lenovo
@@ -37,7 +40,7 @@ public class MainFrame extends javax.swing.JFrame {
         btnBid.setEnabled(false);
 
         btnPass.setEnabled(false);
-
+        btnManageTeams.setEnabled(true);
         return;
     }
 
@@ -53,7 +56,14 @@ public class MainFrame extends javax.swing.JFrame {
 
     lblCurrentBid.setText(
             String.valueOf(engine.getCurrentBid().getAmount()));
+    lblCurrentBid.setForeground(new java.awt.Color(0, 153, 0));   // flash green
+lblCurrentBid.setFont(lblCurrentBid.getFont().deriveFont(java.awt.Font.BOLD, 16f));
 
+javax.swing.Timer flashTimer = new javax.swing.Timer(500, e -> {
+    lblCurrentBid.setForeground(java.awt.Color.BLACK);
+});
+flashTimer.setRepeats(false);
+flashTimer.start();
     if (engine.getCurrentBid().getBidder() == null) {
 
         lblHighestBidder.setText("None");
@@ -73,40 +83,53 @@ public class MainFrame extends javax.swing.JFrame {
 }
     private void updateTeams() {
 
-    StringBuilder sb = new StringBuilder();
+    teamsPanel.removeAll();
+    teamsPanel.setLayout(new javax.swing.BoxLayout(teamsPanel, javax.swing.BoxLayout.Y_AXIS));
 
     for (Team team : engine.getTeams()) {
 
-        sb.append(team.getTeamName())
-          .append("\n");
+        JPanel card = new JPanel(new java.awt.BorderLayout(5, 2));
+        card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5),
+                javax.swing.BorderFactory.createTitledBorder(team.getTeamName())));
 
-        sb.append("Manager : ")
-          .append(team.getManager().getName())
-          .append("\n");
+        JLabel managerLabel = new JLabel("Manager: " + team.getManager().getName());
+        card.add(managerLabel, java.awt.BorderLayout.NORTH);
 
-        sb.append("Purse : ")
-          .append(team.getPurse())
-          .append("\n");
+        JLabel moraleLabel = new JLabel(
+        "Chemistry: " + team.getChemistry()
+        + "   |   Fan Happiness: " + team.getFanHappiness());
 
-        sb.append("Players : \n");
+card.add(moraleLabel, java.awt.BorderLayout.SOUTH);
+        double startingPurse = team.getPurse() + team.getTotalSquadValue();
+        int percentLeft = startingPurse == 0 ? 0
+                : (int) ((team.getPurse() / startingPurse) * 100);
 
-        if (team.getPlayerNames().isEmpty()) {
+        javax.swing.JProgressBar purseBar = new javax.swing.JProgressBar(0, 100);
+        purseBar.setValue(percentLeft);
+        purseBar.setStringPainted(true);
+        purseBar.setString("Purse: " + team.getPurse());
 
-            sb.append("None\n");
-
+        if (percentLeft < 20) {
+            purseBar.setForeground(java.awt.Color.RED);
+        } else if (percentLeft < 50) {
+            purseBar.setForeground(java.awt.Color.ORANGE);
         } else {
-
-            sb.append(team.getPlayerNames());
-
+            purseBar.setForeground(new java.awt.Color(0, 153, 0));
         }
 
-        sb.append("\n");
-        sb.append("----------------------------------\n");
+        card.add(purseBar, java.awt.BorderLayout.CENTER);
 
+        JLabel squadLabel = new JLabel(
+                "<html>" + team.getPlayerNames().replace("\n", "<br>") + "</html>");
+        card.add(squadLabel, java.awt.BorderLayout.SOUTH);
+
+        teamsPanel.add(card);
+        teamsPanel.add(javax.swing.Box.createVerticalStrut(8));
     }
 
-    jTextArea1.setText(sb.toString());
-
+    teamsPanel.revalidate();
+    teamsPanel.repaint();
 }
 
     /**
@@ -135,10 +158,11 @@ public class MainFrame extends javax.swing.JFrame {
         lblPlayerName = new javax.swing.JLabel();
         btnBid = new javax.swing.JButton();
         btnPass = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
         jLabel16 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
+        btnManageTeams = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        teamsPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Football Auction Game");
@@ -193,20 +217,28 @@ public class MainFrame extends javax.swing.JFrame {
         btnPass.setName("btnPass"); // NOI18N
         btnPass.addActionListener(this::btnPassActionPerformed);
 
-        jTextArea1.setEditable(false);
-        jTextArea1.setBackground(new java.awt.Color(204, 255, 204));
-        jTextArea1.setColumns(20);
-        jTextArea1.setLineWrap(true);
-        jTextArea1.setRows(5);
-        jTextArea1.setWrapStyleWord(true);
-        jTextArea1.setName("txtTeams"); // NOI18N
-        jScrollPane1.setViewportView(jTextArea1);
-
         jLabel16.setText("Ready!!");
         jLabel16.setName("lblStatus"); // NOI18N
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel9.setText("Football Auction Game");
+
+        btnManageTeams.setText("Manage Teams");
+        btnManageTeams.setEnabled(false);
+        btnManageTeams.addActionListener(this::btnManageTeamsActionPerformed);
+
+        javax.swing.GroupLayout teamsPanelLayout = new javax.swing.GroupLayout(teamsPanel);
+        teamsPanel.setLayout(teamsPanelLayout);
+        teamsPanelLayout.setHorizontalGroup(
+            teamsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 307, Short.MAX_VALUE)
+        );
+        teamsPanelLayout.setVerticalGroup(
+            teamsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 348, Short.MAX_VALUE)
+        );
+
+        jScrollPane2.setViewportView(teamsPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -214,50 +246,57 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(28, 28, 28)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jLabel3)
-                                    .addComponent(jLabel4)
-                                    .addComponent(jLabel5)
-                                    .addComponent(jLabel6)
-                                    .addComponent(jLabel7)
-                                    .addComponent(jLabel1))
-                                .addGap(77, 77, 77)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(lblCurrentTurn)
-                                    .addComponent(lblHighestBidder)
-                                    .addComponent(lblCurrentBid)
-                                    .addComponent(lblBasePrice)
-                                    .addComponent(lblOverall)
-                                    .addComponent(lblPosition)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(lblPlayerName)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel8))))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnBid)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnPass))))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGap(28, 28, 28)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel2)
+                                        .addComponent(jLabel3)
+                                        .addComponent(jLabel4)
+                                        .addComponent(jLabel5)
+                                        .addComponent(jLabel6)
+                                        .addComponent(jLabel7)
+                                        .addComponent(jLabel1))
+                                    .addGap(77, 77, 77)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(lblCurrentTurn)
+                                        .addComponent(lblHighestBidder)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(lblPlayerName)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(jLabel8))
+                                        .addComponent(lblCurrentBid)
+                                        .addComponent(lblBasePrice)
+                                        .addComponent(lblOverall)
+                                        .addComponent(lblPosition)))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(btnBid)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(btnPass))))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGap(33, 33, 33)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(6, 6, 6)
+                                    .addComponent(btnManageTeams))
+                                .addComponent(jLabel9))
+                            .addGap(34, 34, 34)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(88, 88, 88)
-                        .addComponent(jLabel16))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(39, 39, 39)
-                        .addComponent(jLabel9)))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
-                .addContainerGap())
+                        .addComponent(jLabel16)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(29, 29, 29)
+                .addGap(28, 28, 28)
                 .addComponent(jLabel9)
-                .addGap(34, 34, 34)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnManageTeams)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -294,8 +333,8 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel16)
-                .addGap(0, 18, Short.MAX_VALUE))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         pack();
@@ -336,6 +375,13 @@ public class MainFrame extends javax.swing.JFrame {
     refreshScreen();
     }//GEN-LAST:event_btnPassActionPerformed
 
+    private void btnManageTeamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageTeamsActionPerformed
+        // TODO add your handling code here:
+        PostAuctionFrame frame = new PostAuctionFrame(engine);
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
+    }//GEN-LAST:event_btnManageTeamsActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -347,6 +393,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBid;
+    private javax.swing.JButton btnManageTeams;
     private javax.swing.JButton btnPass;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel16;
@@ -358,8 +405,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblBasePrice;
     private javax.swing.JLabel lblCurrentBid;
     private javax.swing.JLabel lblCurrentTurn;
@@ -367,5 +413,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel lblOverall;
     private javax.swing.JLabel lblPlayerName;
     private javax.swing.JLabel lblPosition;
+    private javax.swing.JPanel teamsPanel;
     // End of variables declaration//GEN-END:variables
 }

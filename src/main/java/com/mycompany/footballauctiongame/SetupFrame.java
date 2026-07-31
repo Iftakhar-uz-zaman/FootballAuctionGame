@@ -16,9 +16,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 public class SetupFrame extends javax.swing.JFrame {
     private ArrayList<Team> teams = new ArrayList<>();
+    private ArrayList<javax.swing.JPasswordField> passwordFields = new ArrayList<>();
     private ArrayList<JTextField> teamFields = new ArrayList<>();
 private ArrayList<JTextField> managerFields = new ArrayList<>();
 private ArrayList<JTextField> purseFields = new ArrayList<>();
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SetupFrame.class.getName());
 
     /**
@@ -52,6 +54,7 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Football Auction Setup");
@@ -90,6 +93,8 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
 
         jLabel5.setText("Purse");
 
+        jLabel6.setText("Password");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -109,26 +114,25 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
                         .addContainerGap()
                         .addComponent(jScrollPane1))
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(17, 17, 17)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(17, 17, 17)
-                                .addComponent(jLabel2)
-                                .addGap(18, 18, 18)
-                                .addComponent(spnTeams, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(51, 51, 51)
-                                .addComponent(jLabel3)))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3))
                         .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(spnTeams, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel5)
-                                .addGap(58, 58, 58))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnCreate)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel5)
+                                .addGap(84, 84, 84)
+                                .addComponent(jLabel6)
+                                .addGap(59, 59, 59)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -142,10 +146,12 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
                     .addComponent(spnTeams, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCreate))
                 .addGap(12, 12, 12)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3)
+                        .addComponent(jLabel5)
+                        .addComponent(jLabel6)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -171,11 +177,10 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
     }
 
     teamPanel.removeAll();
-
     teamFields.clear();
     managerFields.clear();
     purseFields.clear();
-
+    passwordFields.clear();
 
     
 
@@ -186,17 +191,17 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
         JTextField managerField = new JTextField();
 
         JTextField purseField = new JTextField();
-
+        javax.swing.JPasswordField passwordField = new javax.swing.JPasswordField();
         teamFields.add(teamField);
         managerFields.add(managerField);
         purseFields.add(purseField);
-
-        JPanel row = new JPanel(new GridLayout(1, 3, 10, 10));
+        passwordFields.add(passwordField);
+        JPanel row = new JPanel(new GridLayout(1, 4, 10, 10));
 
 row.add(teamField);
 row.add(managerField);
 row.add(purseField);
-
+row.add(passwordField);
 teamPanel.add(row);
     }
 
@@ -214,8 +219,8 @@ teamPanel.add(row);
         String teamName = teamFields.get(i).getText().trim();
         String managerName = managerFields.get(i).getText().trim();
         String purseText = purseFields.get(i).getText().trim();
-
-        if (teamName.isEmpty() || managerName.isEmpty() || purseText.isEmpty()) {
+        String password = new String(passwordFields.get(i).getPassword()).trim();
+        if (teamName.isEmpty() || managerName.isEmpty() || purseText.isEmpty() || password.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -248,7 +253,7 @@ teamPanel.add(row);
         teams.add(
                 new Team(
                         teamName,
-                        new Manager(managerName, teamName),
+                        new Manager(managerName, teamName, password),
                         purse
                 )
         );
@@ -297,6 +302,7 @@ teamPanel.add(row);
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSpinner spnTeams;
     private javax.swing.JPanel teamPanel;

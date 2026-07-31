@@ -17,6 +17,124 @@ public class Team {
     private Manager manager;
     private double purse;
     private ArrayList<Player> squad;
+    private int droppedCount = 0;
+private int addedCount = 0;
+private int fanHappiness = 50;
+
+public int getChemistry() {
+
+    if (squad.isEmpty()) {
+        return 50;
+    }
+
+    java.util.HashSet<String> positionsCovered = new java.util.HashSet<>();
+
+    for (Player p : squad) {
+        positionsCovered.add(p.getPosition());
+    }
+
+    int chemistry = 50 + (positionsCovered.size() * 5);
+    chemistry -= droppedCount * 3;
+
+    if (chemistry > 100) {
+        chemistry = 100;
+    }
+    if (chemistry < 0) {
+        chemistry = 0;
+    }
+
+    return chemistry;
+}
+
+public int getFanHappiness() {
+    return fanHappiness;
+}
+
+public void initializeFanHappiness() {
+
+    if (squad.isEmpty()) {
+        fanHappiness = 50;
+        return;
+    }
+
+    int totalOverall = 0;
+
+    for (Player p : squad) {
+        totalOverall += p.getOverall();
+    }
+
+    fanHappiness = totalOverall / squad.size();
+
+    if (fanHappiness > 100) {
+        fanHappiness = 100;
+    }
+    if (fanHappiness < 0) {
+        fanHappiness = 0;
+    }
+}
+
+public void adjustFanHappiness(int delta) {
+
+    fanHappiness += delta;
+
+    if (fanHappiness > 100) {
+        fanHappiness = 100;
+    }
+    if (fanHappiness < 0) {
+        fanHappiness = 0;
+    }
+}
+
+public int getDroppedCount() {
+    return droppedCount;
+}
+
+public int getAddedCount() {
+    return addedCount;
+}
+
+public boolean canAddPlayer() {
+    return addedCount < droppedCount;
+}
+
+public void dropPlayer(Player player) throws PlayerNotFoundException {
+
+    if (!squad.contains(player)) {
+        throw new PlayerNotFoundException(
+                player.getName() + " is not in " + teamName + "'s squad."
+        );
+    }
+
+    double refund = player.getCurrentBid() * 0.5;
+
+    purse += refund;
+    squad.remove(player);
+    droppedCount++;
+
+    player.setWinningTeam(null);
+    player.setSold(false);
+    player.resetBid();
+}
+
+public void addPlayer(Player player, double price) throws SwapLimitExceededException, InsufficientPurseException {
+
+    if (!canAddPlayer()) {
+        throw new SwapLimitExceededException(
+                teamName + " cannot buy more players than it has dropped ("
+                + droppedCount + " dropped, " + addedCount + " added)."
+        );
+    }
+
+    if (!canBid(price)) {
+        throw new InsufficientPurseException(
+                teamName + " does not have enough purse to buy "
+                + player.getName() + "."
+        );
+    }
+
+    buyPlayer(player, price); // your existing method — reused, not duplicated
+    addedCount++;
+}
 
     public Team(String teamName, Manager manager, double purse) {
 
@@ -99,7 +217,22 @@ public class Team {
         return total;
 
     }
+    public double getTeamStrength() {
 
+    if (squad.isEmpty()) {
+        return 0;
+    }
+
+    int totalOverall = 0;
+
+    for (Player p : squad) {
+        totalOverall += p.getOverall();
+    }
+
+    double avgOverall = (double) totalOverall / squad.size();
+
+    return (avgOverall * 0.6) + (getChemistry() * 0.2) + (getFanHappiness() * 0.2);
+}
     @Override
     public String toString() {
 

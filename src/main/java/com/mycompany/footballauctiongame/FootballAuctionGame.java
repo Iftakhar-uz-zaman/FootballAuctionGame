@@ -8,12 +8,9 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-import java.util.ArrayList;
 
 public class FootballAuctionGame {
     public static void main(String[] args) {
-
-    java.awt.EventQueue.invokeLater(() -> {
 
         SetupFrame frame = new SetupFrame();
 
@@ -21,7 +18,6 @@ public class FootballAuctionGame {
 
         frame.setVisible(true);
 
-    });
 
 }
 

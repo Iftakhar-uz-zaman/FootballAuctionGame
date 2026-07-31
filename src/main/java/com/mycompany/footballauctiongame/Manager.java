@@ -11,10 +11,27 @@ package com.mycompany.footballauctiongame;
 public class Manager extends Person {
 
     private String teamName;
-    public Manager(String name, String teamName) {
-        super(name);
-        this.teamName = teamName;
-    }
+    private String password;
+
+// existing constructor still works, defaults to no password
+public Manager(String name, String teamName) {
+    this(name, teamName, null);
+}
+
+// NEW overloaded constructor — this is method/constructor overloading, same concept as your Bid/Player overloads
+public Manager(String name, String teamName, String password) {
+    super(name);
+    this.teamName = teamName;
+    this.password = password;
+}
+
+public boolean checkPassword(String attempt) {
+    return password != null && password.equals(attempt);
+}
+
+public void setPassword(String password) {
+    this.password = password;
+}
 
     public String getTeamName() {
         return teamName;

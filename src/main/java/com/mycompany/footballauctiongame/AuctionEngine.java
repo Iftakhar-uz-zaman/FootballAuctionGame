@@ -10,12 +10,14 @@ package com.mycompany.footballauctiongame;
  */
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.Random;
 public class AuctionEngine {
 
     private ArrayList<Player> players;
     private ArrayList<Team> teams;
-
+    private ArrayList<Player> availablePlayers;
+    private String leagueResults = null;
     private int currentPlayerIndex;
     private int currentTeamIndex;
     private int passCount;
@@ -31,7 +33,7 @@ public class AuctionEngine {
         currentPlayerIndex = 0;
         currentTeamIndex = 0;
         passCount = 0;
-
+        availablePlayers = new ArrayList<>();
         if (!players.isEmpty()) {
 
             currentPlayer = players.get(0);
@@ -122,13 +124,13 @@ public class AuctionEngine {
 
             System.out.println(currentPlayer.getName()
                     + " remained UNSOLD.");
-
+            availablePlayers.add(currentPlayer);
             nextPlayer();
 
             return true;
 
         }
-
+        
         // Everyone except highest bidder passed
         if (currentBid.getBidder() != null
                 && passCount >= teams.size() - 1) {
@@ -142,9 +144,27 @@ public class AuctionEngine {
         nextTeam();
 
         return false;
+        
+    }
+    public ArrayList<Player> getAvailablePlayers() {
+    return availablePlayers;
+}
+    public void dropPlayerFromTeam(Team team, Player player) throws PlayerNotFoundException {
+    team.dropPlayer(player);
+    availablePlayers.add(player);
+}
+    public void buyAvailablePlayer(Team team, Player player)
+        throws SwapLimitExceededException, InsufficientPurseException, PlayerNotFoundException {
 
+    if (!availablePlayers.contains(player)) {
+        throw new PlayerNotFoundException(
+                player.getName() + " is not available to buy."
+        );
     }
 
+    team.addPlayer(player, player.getBasePrice());
+    availablePlayers.remove(player);
+}
     private void sellPlayer() {
 
         Team winner = currentBid.getBidder();
@@ -195,7 +215,9 @@ public class AuctionEngine {
             currentPlayer = null;
 
             currentBid = null;
-
+            for (Team team : teams) {          // NEW
+            team.initializeFanHappiness();  // NEW
+        }
             return;
 
         }
@@ -260,4 +282,90 @@ public class AuctionEngine {
 
     }
 
+    public String simulateLeague() {
+
+    if (leagueResults != null) {
+        return leagueResults; // already run — return the same result
+    }
+
+    if (teams.size() < 2) {
+        return "Need at least 2 teams to run a league.";
+    }
+
+    HashMap<Team, Integer> points = new HashMap<>();
+
+    for (Team team : teams) {
+        points.put(team, 0);
+    }
+
+    Random random = new Random();
+    StringBuilder log = new StringBuilder();
+
+    log.append("=== MATCH RESULTS ===\n\n");
+
+    // Round robin: every team plays every other team once
+    for (int i = 0; i < teams.size(); i++) {
+        for (int j = i + 1; j < teams.size(); j++) {
+
+            Team home = teams.get(i);
+            Team away = teams.get(j);
+
+            double homeScore = home.getTeamStrength() + random.nextInt(21) - 10;
+            double awayScore = away.getTeamStrength() + random.nextInt(21) - 10;
+
+            log.append(home.getTeamName())
+               .append(" vs ")
+               .append(away.getTeamName())
+               .append("  ->  ");
+
+            if (homeScore > awayScore) {
+
+                points.put(home, points.get(home) + 3);
+                home.adjustFanHappiness(5);
+                away.adjustFanHappiness(-5);
+                log.append(home.getTeamName()).append(" wins\n");
+
+            } else if (awayScore > homeScore) {
+
+                points.put(away, points.get(away) + 3);
+                away.adjustFanHappiness(5);
+                home.adjustFanHappiness(-5);
+                log.append(away.getTeamName()).append(" wins\n");
+
+            } else {
+
+                points.put(home, points.get(home) + 1);
+                points.put(away, points.get(away) + 1);
+                home.adjustFanHappiness(1);
+                away.adjustFanHappiness(1);
+                log.append("Draw\n");
+            }
+        }
+    }
+
+    ArrayList<Team> standings = new ArrayList<>(teams);
+    standings.sort((t1, t2) -> points.get(t2) - points.get(t1));
+
+    log.append("\n=== FINAL STANDINGS ===\n\n");
+
+    int rank = 1;
+
+    for (Team team : standings) {
+
+        log.append(rank)
+           .append(". ")
+           .append(team.getTeamName())
+           .append(" - ")
+           .append(points.get(team))
+           .append(" pts  (Fan Happiness: ")
+           .append(team.getFanHappiness())
+           .append(")\n");
+
+        rank++;
+    }
+
+    leagueResults = log.toString();
+
+    return leagueResults;
+}
 }
