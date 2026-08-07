@@ -10,7 +10,6 @@ package com.mycompany.footballauctiongame;
  */
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,8 +17,8 @@ public class SetupFrame extends javax.swing.JFrame {
     private ArrayList<Team> teams = new ArrayList<>();
     private ArrayList<javax.swing.JPasswordField> passwordFields = new ArrayList<>();
     private ArrayList<JTextField> teamFields = new ArrayList<>();
-private ArrayList<JTextField> managerFields = new ArrayList<>();
-private ArrayList<JTextField> purseFields = new ArrayList<>();
+    private ArrayList<JTextField> managerFields = new ArrayList<>();
+    private ArrayList<JTextField> purseFields = new ArrayList<>();
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SetupFrame.class.getName());
 
@@ -28,11 +27,10 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
      */
     public SetupFrame() {
         initComponents();
-        spnTeams.setModel(
-    new javax.swing.SpinnerNumberModel(2, 2, 20, 1));
-        teamPanel.setLayout(new javax.swing.BoxLayout(
-        teamPanel,
-        javax.swing.BoxLayout.Y_AXIS));
+        //2.creates spinner
+        spnTeams.setModel(new javax.swing.SpinnerNumberModel(2, 2, 20, 1));
+        //3.creates teampanel
+        teamPanel.setLayout(new javax.swing.BoxLayout(teamPanel,javax.swing.BoxLayout.Y_AXIS));
     }
 
     /**
@@ -162,127 +160,79 @@ private ArrayList<JTextField> purseFields = new ArrayList<>();
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //sets the number of teams
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
-        // TODO add your handling code here:
-       
 
-    int numberOfTeams = (Integer) spnTeams.getValue();
-
-    if (numberOfTeams < 2) {
-        javax.swing.JOptionPane.showMessageDialog(
-                this,
-                "At least 2 teams are required."
-        );
-        return;
-    }
-
-    teamPanel.removeAll();
-    teamFields.clear();
-    managerFields.clear();
-    purseFields.clear();
-    passwordFields.clear();
-
-    
-
-    for (int i = 1; i <= numberOfTeams; i++) {
-
-        JTextField teamField = new JTextField();
-
-        JTextField managerField = new JTextField();
-
-        JTextField purseField = new JTextField();
-        javax.swing.JPasswordField passwordField = new javax.swing.JPasswordField();
-        teamFields.add(teamField);
-        managerFields.add(managerField);
-        purseFields.add(purseField);
-        passwordFields.add(passwordField);
-        JPanel row = new JPanel(new GridLayout(1, 4, 10, 10));
-
-row.add(teamField);
-row.add(managerField);
-row.add(purseField);
-row.add(passwordField);
-teamPanel.add(row);
-    }
-
-    teamPanel.revalidate();
-    teamPanel.repaint();
-
+        int numberOfTeams = (Integer) spnTeams.getValue();
+        if (numberOfTeams < 2) {
+            javax.swing.JOptionPane.showMessageDialog(this,"At least 2 teams are required.");
+            return;
+        }
+        teamPanel.removeAll();
+        teamFields.clear();
+        managerFields.clear();
+        purseFields.clear();
+        passwordFields.clear();
+        //sets team info
+        for (int i = 1; i <= numberOfTeams; i++) {
+            JTextField teamField = new JTextField();
+            JTextField managerField = new JTextField();
+            JTextField purseField = new JTextField();
+            javax.swing.JPasswordField passwordField = new javax.swing.JPasswordField();
+            teamFields.add(teamField);
+            managerFields.add(managerField);
+            purseFields.add(purseField);
+            passwordFields.add(passwordField);
+            JPanel row = new JPanel(new GridLayout(1, 4, 10, 10));
+            row.add(teamField);
+            row.add(managerField);
+            row.add(purseField);
+            row.add(passwordField);
+            teamPanel.add(row);
+        }
+        teamPanel.revalidate();
+        teamPanel.repaint();
     }//GEN-LAST:event_btnCreateActionPerformed
 
+    //5. Start Auction button performed
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // TODO add your handling code here:
         teams.clear();
-
-    for (int i = 0; i < teamFields.size(); i++) {
-
-        String teamName = teamFields.get(i).getText().trim();
-        String managerName = managerFields.get(i).getText().trim();
-        String purseText = purseFields.get(i).getText().trim();
-        String password = new String(passwordFields.get(i).getPassword()).trim();
-        if (teamName.isEmpty() || managerName.isEmpty() || purseText.isEmpty() || password.isEmpty()) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please fill all fields."
-            );
-
-            return;
-        }
-
-        double purse;
-
-        try {
-
-            purse = Double.parseDouble(purseText);
-
-            if (purse <= 0) {
-                throw new NumberFormatException();
+        for (int i = 0; i < teamFields.size(); i++) {
+            String teamName = teamFields.get(i).getText().trim();
+            String managerName = managerFields.get(i).getText().trim();
+            String purseText = purseFields.get(i).getText().trim();
+            String password = new String(passwordFields.get(i).getPassword()).trim();
+            if (teamName.isEmpty() || managerName.isEmpty() || purseText.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this,"Please fill all fields.");
+                return;
             }
-
-        } catch (NumberFormatException e) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Invalid purse for Team " + (i + 1)
-            );
-
+            double purse;
+            try {
+                purse = Double.parseDouble(purseText);
+                if (purse <= 0) {
+                    throw new NumberFormatException();
+                }
+            } 
+            catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,"Invalid purse for Team " + (i + 1));
+                return;
+            }
+            teams.add(new Team(teamName,new Manager(managerName, teamName, password),purse));
+        }
+        //loads players from excel file
+        ArrayList<Player> players = ExcelReader.loadPlayers("players.xlsx");
+        if (players.isEmpty()) {
+            JOptionPane.showMessageDialog(this,"No players found!");
             return;
         }
-
-        teams.add(
-                new Team(
-                        teamName,
-                        new Manager(managerName, teamName, password),
-                        purse
-                )
-        );
-
-    }
-
-    ArrayList<Player> players =
-            ExcelReader.loadPlayers("players.xlsx");
-
-    if (players.isEmpty()) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "No players found!"
-        );
-
-        return;
-    }
-
-    AuctionEngine engine =
-            new AuctionEngine(players, teams);
-
-    MainFrame frame = new MainFrame(engine);
-
-    frame.setLocationRelativeTo(null);
-
-    frame.setVisible(true);
-
-    dispose();
+        //6. calls auction engine
+        AuctionEngine engine = new AuctionEngine(players, teams);
+        //7. opens mainframe
+        MainFrame frame = new MainFrame(engine);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        dispose();
     }//GEN-LAST:event_btnStartActionPerformed
 
     /**

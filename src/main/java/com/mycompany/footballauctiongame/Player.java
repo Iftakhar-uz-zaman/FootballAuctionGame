@@ -20,15 +20,12 @@ public class Player {
     private Team winningTeam;
     private boolean sold;
 
-    public Player(int id, String name, String position,
-                  int overall, double basePrice) {
-
+    public Player(int id, String name, String position, int overall, double basePrice) {
         this.id = id;
         this.name = name;
         this.position = position;
         this.overall = overall;
         this.basePrice = basePrice;
-
         this.currentBid = basePrice;
         this.winningTeam = null;
         this.sold = false;
@@ -78,7 +75,6 @@ public class Player {
         this.sold = sold;
     }
 
-    // Method Overloading
     public void resetBid() {
         currentBid = basePrice;
         winningTeam = null;
@@ -91,11 +87,6 @@ public class Player {
 
     @Override
     public String toString() {
-
-        return id + ". " + name +
-                " | " + position +
-                " | OVR " + overall +
-                " | Base Price: " + basePrice;
-
+        return id + ". " + name + " | " + position + " | OVR " + overall + " | Base Price: " + basePrice;
     }
 }

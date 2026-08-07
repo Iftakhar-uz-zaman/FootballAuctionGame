@@ -15,33 +15,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class TextFileManager {
-
     public static void saveTeams(ArrayList<Team> teams) {
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("teams.txt"))) {
-
             for (Team team : teams) {
-
-                writer.write(
-                        team.getTeamName() + "|" +
-                        team.getManager().getName() + "|" +
-                        team.getPurse() + "|" +
-                        team.getPlayerNames()
-                );
-
+                writer.write(team.getTeamName() + "|" + team.getManager().getName() + "|" + team.getPurse() + "|" + team.getPlayerNames());
                 writer.newLine();
 
             }
-
             System.out.println("Teams saved successfully.");
-
-        } catch (IOException e) {
-
+        }
+        catch (IOException e) {
             System.out.println("Error saving teams.");
             e.printStackTrace();
-
         }
-
     }
-
 }

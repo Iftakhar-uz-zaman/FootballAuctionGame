@@ -14,123 +14,86 @@ import javax.swing.JPanel;
 public class MainFrame extends javax.swing.JFrame {
     private AuctionEngine engine;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
-
-    /**
-     * Creates new form MainFrame
-     */
+    
     public MainFrame(AuctionEngine engine) {
-
     initComponents();
-
     this.engine = engine;
-
     refreshScreen();
-
-}
+    }
+    
+    //shows player info
     private void refreshScreen() {
-
-    if (engine == null) {
-        return;
-    }
-
-    if (engine.auctionFinished()) {
-
-        jLabel16.setText("Auction Finished!");
-
-        btnBid.setEnabled(false);
-
-        btnPass.setEnabled(false);
-        btnManageTeams.setEnabled(true);
-        return;
-    }
-
-    Player player = engine.getCurrentPlayer();
-
-    lblPlayerName.setText(player.getName());
-
-    lblPosition.setText(player.getPosition());
-
-    lblOverall.setText(String.valueOf(player.getOverall()));
-
-    lblBasePrice.setText(String.valueOf(player.getBasePrice()));
-
-    lblCurrentBid.setText(
-            String.valueOf(engine.getCurrentBid().getAmount()));
-    lblCurrentBid.setForeground(new java.awt.Color(0, 153, 0));   // flash green
-lblCurrentBid.setFont(lblCurrentBid.getFont().deriveFont(java.awt.Font.BOLD, 16f));
-
-javax.swing.Timer flashTimer = new javax.swing.Timer(500, e -> {
-    lblCurrentBid.setForeground(java.awt.Color.BLACK);
-});
-flashTimer.setRepeats(false);
-flashTimer.start();
-    if (engine.getCurrentBid().getBidder() == null) {
-
-        lblHighestBidder.setText("None");
-
-    } else {
-
-        lblHighestBidder.setText(
-                engine.getCurrentBid().getBidder().getTeamName());
-
-    }
-
-    lblCurrentTurn.setText(
-            engine.getCurrentTeam().getTeamName());
-
-    jLabel16.setText("Waiting for bid...");
-    updateTeams();
-}
-    private void updateTeams() {
-
-    teamsPanel.removeAll();
-    teamsPanel.setLayout(new javax.swing.BoxLayout(teamsPanel, javax.swing.BoxLayout.Y_AXIS));
-
-    for (Team team : engine.getTeams()) {
-
-        JPanel card = new JPanel(new java.awt.BorderLayout(5, 2));
-        card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5),
-                javax.swing.BorderFactory.createTitledBorder(team.getTeamName())));
-
-        JLabel managerLabel = new JLabel("Manager: " + team.getManager().getName());
-        card.add(managerLabel, java.awt.BorderLayout.NORTH);
-
-        JLabel moraleLabel = new JLabel(
-        "Chemistry: " + team.getChemistry()
-        + "   |   Fan Happiness: " + team.getFanHappiness());
-
-card.add(moraleLabel, java.awt.BorderLayout.SOUTH);
-        double startingPurse = team.getPurse() + team.getTotalSquadValue();
-        int percentLeft = startingPurse == 0 ? 0
-                : (int) ((team.getPurse() / startingPurse) * 100);
-
-        javax.swing.JProgressBar purseBar = new javax.swing.JProgressBar(0, 100);
-        purseBar.setValue(percentLeft);
-        purseBar.setStringPainted(true);
-        purseBar.setString("Purse: " + team.getPurse());
-
-        if (percentLeft < 20) {
-            purseBar.setForeground(java.awt.Color.RED);
-        } else if (percentLeft < 50) {
-            purseBar.setForeground(java.awt.Color.ORANGE);
-        } else {
-            purseBar.setForeground(new java.awt.Color(0, 153, 0));
+        if (engine == null) {
+            return;
         }
-
-        card.add(purseBar, java.awt.BorderLayout.CENTER);
-
-        JLabel squadLabel = new JLabel(
-                "<html>" + team.getPlayerNames().replace("\n", "<br>") + "</html>");
-        card.add(squadLabel, java.awt.BorderLayout.SOUTH);
-
-        teamsPanel.add(card);
-        teamsPanel.add(javax.swing.Box.createVerticalStrut(8));
+        if (engine.auctionFinished()) {
+            jLabel16.setText("Auction Finished!");
+            btnBid.setEnabled(false);
+            btnPass.setEnabled(false);
+            btnManageTeams.setEnabled(true);
+            return;
+        }
+        //gets players details from auction engine
+        Player player = engine.getCurrentPlayer();
+        lblPlayerName.setText(player.getName());
+        lblPosition.setText(player.getPosition());
+        lblOverall.setText(String.valueOf(player.getOverall()));
+        lblBasePrice.setText(String.valueOf(player.getBasePrice()));
+        lblCurrentBid.setText(String.valueOf(engine.getCurrentBid().getAmount()));
+        lblCurrentBid.setForeground(new java.awt.Color(0, 153, 0));
+        lblCurrentBid.setFont(lblCurrentBid.getFont().deriveFont(java.awt.Font.BOLD, 16f));
+        javax.swing.Timer flashTimer = new javax.swing.Timer(500, e -> {
+            lblCurrentBid.setForeground(java.awt.Color.BLACK);
+        });
+        flashTimer.setRepeats(false);
+        flashTimer.start();
+        //then responds after bid or pass
+        if (engine.getCurrentBid().getBidder() == null) {
+            lblHighestBidder.setText("None");
+        } 
+        else {
+            lblHighestBidder.setText(engine.getCurrentBid().getBidder().getTeamName());
+        }
+        lblCurrentTurn.setText(engine.getCurrentTeam().getTeamName());
+        jLabel16.setText("Waiting for bid...");
+        updateTeams();
     }
-
-    teamsPanel.revalidate();
-    teamsPanel.repaint();
-}
+    
+    //shows team status on side panel
+    private void updateTeams() {
+        teamsPanel.removeAll();
+        teamsPanel.setLayout(new javax.swing.BoxLayout(teamsPanel, javax.swing.BoxLayout.Y_AXIS));
+        for (Team team : engine.getTeams()) {
+            JPanel card = new JPanel(new java.awt.BorderLayout(5, 2));
+            card.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5), javax.swing.BorderFactory.createTitledBorder(team.getTeamName())));
+            JLabel managerLabel = new JLabel("Manager: " + team.getManager().getName());
+            card.add(managerLabel, java.awt.BorderLayout.NORTH);
+            JLabel moraleLabel = new JLabel("Chemistry: " + team.getChemistry() + "   |   Fan Happiness: " + team.getFanHappiness());
+            card.add(moraleLabel, java.awt.BorderLayout.SOUTH);
+            double startingPurse = team.getPurse() + team.getTotalSquadValue();
+            int percentLeft = startingPurse == 0 ? 0 : (int) ((team.getPurse() / startingPurse) * 100);
+            javax.swing.JProgressBar purseBar = new javax.swing.JProgressBar(0, 100);
+            purseBar.setValue(percentLeft);
+            purseBar.setStringPainted(true);
+            purseBar.setString("Purse: " + team.getPurse());
+            if (percentLeft < 20) {
+                purseBar.setForeground(java.awt.Color.RED);
+            }
+            else if (percentLeft < 50) {
+                purseBar.setForeground(java.awt.Color.ORANGE);
+            }
+            else {
+                purseBar.setForeground(new java.awt.Color(0, 153, 0));
+            }
+            card.add(purseBar, java.awt.BorderLayout.CENTER);
+            JLabel squadLabel = new JLabel("<html>" + team.getPlayerNames().replace("\n", "<br>") + "</html>");
+            card.add(squadLabel, java.awt.BorderLayout.SOUTH);
+            teamsPanel.add(card);
+            teamsPanel.add(javax.swing.Box.createVerticalStrut(8));
+        }
+        teamsPanel.revalidate();
+        teamsPanel.repaint();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -340,46 +303,38 @@ card.add(moraleLabel, java.awt.BorderLayout.SOUTH);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    
+    //places bid
     private void btnBidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBidActionPerformed
         // TODO add your handling code here:
         boolean success = engine.bid();
-
-    if (success) {
-
-        jLabel16.setText("Bid placed successfully.");
-
-    } else {
-
-        jLabel16.setText("Not enough purse!");
-
-    }
-
-    refreshScreen();
+        if (success) {
+            jLabel16.setText("Bid placed successfully.");
+        }
+        else {
+            jLabel16.setText("Not enough purse!");
+        }
+        refreshScreen();
     }//GEN-LAST:event_btnBidActionPerformed
 
+    //12. passes a player
     private void btnPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPassActionPerformed
         // TODO add your handling code here:
         boolean sold = engine.pass();
-
-    if (sold) {
-
+        if (sold) {
         jLabel16.setText("Player sold.");
-
-    } else {
-
-        jLabel16.setText("Turn passed.");
-
-    }
-
+        }
+        else {
+            jLabel16.setText("Turn passed.");
+        }
     refreshScreen();
     }//GEN-LAST:event_btnPassActionPerformed
 
     private void btnManageTeamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageTeamsActionPerformed
         // TODO add your handling code here:
+        //goes to post auction frame
         PostAuctionFrame frame = new PostAuctionFrame(engine);
-    frame.setLocationRelativeTo(null);
-    frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }//GEN-LAST:event_btnManageTeamsActionPerformed
 
     /**

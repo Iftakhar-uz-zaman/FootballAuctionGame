@@ -11,14 +11,9 @@ package com.mycompany.footballauctiongame;
 
 public class FootballAuctionGame {
     public static void main(String[] args) {
-
+        //calls setup frame
         SetupFrame frame = new SetupFrame();
-
         frame.setLocationRelativeTo(null);
-
         frame.setVisible(true);
-
-
-}
-
+    }
 }

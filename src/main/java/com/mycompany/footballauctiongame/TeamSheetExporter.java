@@ -13,11 +13,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class TeamSheetExporter {
-
     public static void exportTeamSheet(Team team, java.io.File file) throws IOException {
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-
             writer.write("TEAM SHEET");
             writer.newLine();
             writer.write("Team: " + team.getTeamName());

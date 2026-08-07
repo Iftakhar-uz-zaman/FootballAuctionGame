@@ -10,10 +10,9 @@ package com.mycompany.footballauctiongame;
  */
 
 public class Bid {
-
     private Team bidder;
     private double amount;
-
+    
     public Bid() {
         bidder = null;
         amount = 0;
@@ -40,7 +39,6 @@ public class Bid {
         this.amount = amount;
     }
 
-    // Method Overloading
     public void increaseBid() {
         amount += 10;
     }
@@ -51,14 +49,10 @@ public class Bid {
 
     @Override
     public String toString() {
-
         if (bidder == null) {
             return "Current Bid: " + amount + " | No Highest Bidder";
         }
-
-        return "Current Bid: " + amount +
-               " | Highest Bidder: " +
-               bidder.getTeamName();
+        return "Current Bid: " + amount + " | Highest Bidder: " + bidder.getTeamName();
     }
 }
 
