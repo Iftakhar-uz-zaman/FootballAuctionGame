@@ -1,3 +1,5 @@
-Barca|Ifty|710.0|Messi        190.0
+k|k|580.0|Ronaldo        200.0
+Vinicius Jr        120.0
 
-Madrid|Galib|900.0|
+j|j|760.0|Pedri        140.0
+

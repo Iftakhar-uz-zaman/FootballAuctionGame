@@ -22,14 +22,12 @@ public class SetupFrame extends javax.swing.JFrame {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SetupFrame.class.getName());
 
-    /**
-     * Creates new form SetupFrame
-     */
+    // Creates new form SetupFrame
     public SetupFrame() {
         initComponents();
-        //2.creates spinner
+        //creates spinner
         spnTeams.setModel(new javax.swing.SpinnerNumberModel(2, 2, 20, 1));
-        //3.creates teampanel
+        //creates team panel
         teamPanel.setLayout(new javax.swing.BoxLayout(teamPanel,javax.swing.BoxLayout.Y_AXIS));
     }
 
@@ -194,7 +192,7 @@ public class SetupFrame extends javax.swing.JFrame {
         teamPanel.repaint();
     }//GEN-LAST:event_btnCreateActionPerformed
 
-    //5. Start Auction button performed
+    //Start Auction button performed
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // TODO add your handling code here:
         teams.clear();
@@ -226,9 +224,9 @@ public class SetupFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this,"No players found!");
             return;
         }
-        //6. calls auction engine
+        //calls auction engine
         AuctionEngine engine = new AuctionEngine(players, teams);
-        //7. opens mainframe
+        //opens mainframe
         MainFrame frame = new MainFrame(engine);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

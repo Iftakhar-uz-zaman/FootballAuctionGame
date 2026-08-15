@@ -43,21 +43,16 @@ public class Team {
         return fanHappiness;
     }
 
-    public void initializeFanHappiness() {
-    
+    public void initializeFanHappiness() {   
         if (squad.isEmpty()) {       
             fanHappiness = 50;        
             return;    
-        }
-    
-        int totalOverall = 0;
-    
+        }   
+        int totalOverall = 0;   
         for (Player p : squad) {        
             totalOverall += p.getOverall();    
-        }
-    
-        fanHappiness = totalOverall / squad.size();
-    
+        }    
+        fanHappiness = totalOverall / squad.size();   
         if (fanHappiness > 100) {        
             fanHappiness = 100;    
         }    

@@ -9,10 +9,9 @@ package com.mycompany.footballauctiongame;
  * @author Lenovo
  */
 
-public class Player {
+public class Player extends Person{
 
     private int id;
-    private String name;
     private String position;
     private int overall;
     private double basePrice;
@@ -22,7 +21,7 @@ public class Player {
 
     public Player(int id, String name, String position, int overall, double basePrice) {
         this.id = id;
-        this.name = name;
+        super(name);
         this.position = position;
         this.overall = overall;
         this.basePrice = basePrice;
@@ -33,10 +32,6 @@ public class Player {
 
     public int getId() {
         return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getPosition() {
@@ -86,7 +81,12 @@ public class Player {
     }
 
     @Override
+    public String getRole() {
+        return "Player";
+    }
+    
+    @Override
     public String toString() {
-        return id + ". " + name + " | " + position + " | OVR " + overall + " | Base Price: " + basePrice;
+        return id + ". " + getName() + " | " + position + " | OVR " + overall + " | Base Price: " + basePrice;
     }
 }

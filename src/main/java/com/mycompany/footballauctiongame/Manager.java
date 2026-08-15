@@ -12,15 +12,12 @@ public class Manager extends Person {
     private String teamName;
     private String password;
     
-    public Manager(String name, String teamName) {
-        this(name, teamName, null);
-    }
-
     public Manager(String name, String teamName, String password) {
         super(name);
         this.teamName = teamName;
         this.password = password;
     }
+    
     public boolean checkPassword(String attempt) {
         return password != null && password.equals(attempt);
     }

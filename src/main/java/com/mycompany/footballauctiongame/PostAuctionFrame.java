@@ -31,6 +31,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         initComponents();
     }
 
+    //sets login panel layout
     private JPanel buildLoginPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
@@ -87,6 +88,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         return panel;
     }
     
+    //sets team panel screen
     private JPanel buildTeamPanel(Team team) {    
         JPanel panel = new JPanel(new java.awt.BorderLayout(10, 10));   
         panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));    
@@ -122,8 +124,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         Runnable refresh = () -> {        
             infoLabel.setText(team.getTeamName() + "   |   Manager: " + team.getManager().getName() + "   |   Purse: " + team.getPurse() + "   |   Chemistry: " + team.getChemistry() + "   |   Fan Happiness: " + team.getFanHappiness() + "   |   Dropped: " + team.getDroppedCount() + "   |   Added: " + team.getAddedCount());        
             squadModel.clear();       
-            for (Player p : team.getSquad()) {
-            
+            for (Player p : team.getSquad()) {           
                 squadModel.addElement(p);
             }        
             availableModel.clear();        
@@ -131,7 +132,8 @@ public class PostAuctionFrame extends javax.swing.JFrame {
                 availableModel.addElement(p);        
             }        
         };    
-        refresh.run();    
+        refresh.run();
+        //works when dropping a player
         dropButton.addActionListener(e -> {        
             Player selected = squadList.getSelectedValue();        
             if (selected == null) {            
@@ -146,7 +148,8 @@ public class PostAuctionFrame extends javax.swing.JFrame {
                 statusLabel.setText("Error: " + ex.getMessage());        
             }        
             refresh.run();    
-        });    
+        });
+        //works while adding a player
         buyButton.addActionListener(e -> {            
             Player selected = availableList.getSelectedValue();       
             if (selected == null) {            
@@ -167,7 +170,8 @@ public class PostAuctionFrame extends javax.swing.JFrame {
                 statusLabel.setText("Error: " + ex.getMessage());        
             }        
             refresh.run();    
-        });    
+        });
+        //downloads team sheet
         downloadButton.addActionListener(e -> {        
             JFileChooser chooser = new JFileChooser();        
             chooser.setSelectedFile(new java.io.File(team.getTeamName() + "_sheet.txt"));        
@@ -181,7 +185,8 @@ public class PostAuctionFrame extends javax.swing.JFrame {
                     statusLabel.setText("Error saving file: " + ex.getMessage());           
                 }       
             }    
-        });    
+        });
+        //logouts the manager
         logoutButton.addActionListener(e -> {        
             mainContainer.remove(panel);        
             currentTeamPanel = null;        

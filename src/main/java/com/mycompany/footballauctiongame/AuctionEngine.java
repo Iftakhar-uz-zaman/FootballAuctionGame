@@ -12,6 +12,7 @@ package com.mycompany.footballauctiongame;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+
 public class AuctionEngine {
     private ArrayList<Player> players;
     private ArrayList<Team> teams;
@@ -104,11 +105,13 @@ public class AuctionEngine {
         return availablePlayers;
     }
     
-    public void dropPlayerFromTeam(Team team, Player player) throws PlayerNotFoundException {
-    team.dropPlayer(player);
-    availablePlayers.add(player);
+    //drops a player from team
+    public void dropPlayerFromTeam(Team team, Player player) throws PlayerNotFoundException {   
+        team.dropPlayer(player);   
+        availablePlayers.add(player);
     }
     
+    //adds a player after auction
     public void buyAvailablePlayer(Team team, Player player) throws SwapLimitExceededException, InsufficientPurseException, PlayerNotFoundException {   
         if (!availablePlayers.contains(player)) {       
             throw new PlayerNotFoundException(player.getName() + " is not available to buy.");   
@@ -117,6 +120,7 @@ public class AuctionEngine {
         availablePlayers.remove(player);
     }
     
+    //when a player is sold to a team
     private void sellPlayer() {
         Team winner = currentBid.getBidder();
         if (winner != null) {
@@ -148,6 +152,7 @@ public class AuctionEngine {
         passCount = 0;
     }
 
+    //shows ongoing player who is being auctioned
     public void showCurrentPlayer() {
         if (currentPlayer == null) {
             System.out.println("Auction Finished!");
@@ -170,9 +175,10 @@ public class AuctionEngine {
         System.out.println("-----------------------------------");
     }
 
+    //simulates league after team set up
     public String simulateLeague() {    
         if (leagueResults != null) {
-        return leagueResults; // already run — return the same result   
+        return leagueResults; //already run — return the same result   
         }   
         if (teams.size() < 2) {        
             return "Need at least 2 teams to run a league.";    
@@ -213,6 +219,7 @@ public class AuctionEngine {
                 }        
             }   
         }
+        //shows team standings
         ArrayList<Team> standings = new ArrayList<>(teams);    
         standings.sort((t1, t2) -> points.get(t2) - points.get(t1));   
         log.append("\n=== FINAL STANDINGS ===\n\n");   
