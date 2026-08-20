@@ -11,9 +11,11 @@ package com.mycompany.footballauctiongame;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.File;
 
 public class TeamSheetExporter {
-    public static void exportTeamSheet(Team team, java.io.File file) throws IOException {
+    // writes the team info on a text file for a manager to download
+    public static void exportTeamSheet(Team team, File file) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("TEAM SHEET");
             writer.newLine();

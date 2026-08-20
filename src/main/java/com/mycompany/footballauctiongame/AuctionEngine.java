@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -54,10 +54,12 @@ public class AuctionEngine {
         return teams;
     }
 
+    //returns the condition in refresh screen method in main frame when auction is finished
     public boolean auctionFinished() {
         return currentPlayerIndex >= players.size();
     }
 
+    //calls the index for next team
     private void nextTeam() {
         currentTeamIndex++;
         if (currentTeamIndex >= teams.size()) {
@@ -65,12 +67,12 @@ public class AuctionEngine {
         }
     }
 
+    //proceeds or declines a bid made by a team
     public boolean bid() {
         Team team = getCurrentTeam();
-        //goes to bid from here
         double nextPrice = currentBid.getAmount() + 10;
         if (!team.canBid(nextPrice)) {
-            javax.swing.JOptionPane.showMessageDialog(null,team.getTeamName() + " does not have enough purse.","Insufficient Funds",javax.swing.JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null,team.getTeamName() + " does not have enough purse.","Insufficient Funds",JOptionPane.WARNING_MESSAGE);
             nextTeam();
             return false;
         }
@@ -83,6 +85,7 @@ public class AuctionEngine {
         return true;
     }
 
+    //proceeds when a team passes a player
     public boolean pass() {
         passCount++;
         // Everyone passed without any bid
@@ -105,7 +108,7 @@ public class AuctionEngine {
         return availablePlayers;
     }
     
-    //drops a player from team
+    //drops a player from team after auction
     public void dropPlayerFromTeam(Team team, Player player) throws PlayerNotFoundException {   
         team.dropPlayer(player);   
         availablePlayers.add(player);
@@ -120,7 +123,7 @@ public class AuctionEngine {
         availablePlayers.remove(player);
     }
     
-    //when a player is sold to a team
+    //runs when a team wins a bid or every team passes
     private void sellPlayer() {
         Team winner = currentBid.getBidder();
         if (winner != null) {

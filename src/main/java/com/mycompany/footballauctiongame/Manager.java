@@ -18,10 +18,11 @@ public class Manager extends Person {
         this.password = password;
     }
     
+    //checks if the password attempt is correct or not
     public boolean checkPassword(String attempt) {
         return password != null && password.equals(attempt);
     }
-    
+
     public void setPassword(String password) {
         this.password = password;
     }

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class TextFileManager {
+    //stores all team details in a text file 
     public static void saveTeams(ArrayList<Team> teams) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("teams.txt"))) {
             for (Team team : teams) {
@@ -26,7 +27,6 @@ public class TextFileManager {
         }
         catch (IOException e) {
             System.out.println("Error saving teams.");
-            e.printStackTrace();
         }
     }
 }

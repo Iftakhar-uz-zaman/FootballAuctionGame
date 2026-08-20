@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelReader {
+    //loads player info from excel file
     public static ArrayList<Player> loadPlayers(String fileName) {
         ArrayList<Player> players = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream(fileName);
@@ -45,7 +46,6 @@ public class ExcelReader {
         }
         catch (IOException e) {
             System.out.println("Unable to open Excel file.");
-            e.printStackTrace();
         }
         return players;
     }

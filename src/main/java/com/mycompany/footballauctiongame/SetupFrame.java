@@ -8,27 +8,24 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
+import javax.swing.*;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import javax.swing.JTextField;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+
 public class SetupFrame extends javax.swing.JFrame {
     private ArrayList<Team> teams = new ArrayList<>();
-    private ArrayList<javax.swing.JPasswordField> passwordFields = new ArrayList<>();
+    private ArrayList<JPasswordField> passwordFields = new ArrayList<>();
     private ArrayList<JTextField> teamFields = new ArrayList<>();
     private ArrayList<JTextField> managerFields = new ArrayList<>();
     private ArrayList<JTextField> purseFields = new ArrayList<>();
-
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SetupFrame.class.getName());
 
     // Creates new form SetupFrame
     public SetupFrame() {
         initComponents();
         //creates spinner
-        spnTeams.setModel(new javax.swing.SpinnerNumberModel(2, 2, 20, 1));
+        spnTeams.setModel(new SpinnerNumberModel(2, 2, 20, 1));
         //creates team panel
-        teamPanel.setLayout(new javax.swing.BoxLayout(teamPanel,javax.swing.BoxLayout.Y_AXIS));
+        teamPanel.setLayout(new BoxLayout(teamPanel,javax.swing.BoxLayout.Y_AXIS));
     }
 
     /**
@@ -163,7 +160,7 @@ public class SetupFrame extends javax.swing.JFrame {
 
         int numberOfTeams = (Integer) spnTeams.getValue();
         if (numberOfTeams < 2) {
-            javax.swing.JOptionPane.showMessageDialog(this,"At least 2 teams are required.");
+            JOptionPane.showMessageDialog(this,"At least 2 teams are required.");
             return;
         }
         teamPanel.removeAll();
@@ -176,7 +173,7 @@ public class SetupFrame extends javax.swing.JFrame {
             JTextField teamField = new JTextField();
             JTextField managerField = new JTextField();
             JTextField purseField = new JTextField();
-            javax.swing.JPasswordField passwordField = new javax.swing.JPasswordField();
+            JPasswordField passwordField = new JPasswordField();
             teamFields.add(teamField);
             managerFields.add(managerField);
             purseFields.add(purseField);
@@ -224,9 +221,7 @@ public class SetupFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this,"No players found!");
             return;
         }
-        //calls auction engine
         AuctionEngine engine = new AuctionEngine(players, teams);
-        //opens mainframe
         MainFrame frame = new MainFrame(engine);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -236,12 +231,7 @@ public class SetupFrame extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    /*
-    public static void main(String args[]) {
-        
-        java.awt.EventQueue.invokeLater(() -> new SetupFrame().setVisible(true));
-    }
-*/
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
     private javax.swing.JButton btnStart;

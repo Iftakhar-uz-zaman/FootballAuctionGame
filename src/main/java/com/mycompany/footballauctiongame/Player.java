@@ -50,26 +50,32 @@ public class Player extends Person{
         return currentBid;
     }
 
+    //returns the team name who won the player purchase
     public Team getWinningTeam() {
         return winningTeam;
     }
 
+    //checks if the player is sold or not
     public boolean isSold() {
         return sold;
     }
 
+    //sets the current price for a player after every bid made
     public void setCurrentBid(double currentBid) {
         this.currentBid = currentBid;
     }
 
+    //sets the team name who won the player purchase
     public void setWinningTeam(Team winningTeam) {
         this.winningTeam = winningTeam;
     }
 
+    //marks the player as sold
     public void setSold(boolean sold) {
         this.sold = sold;
     }
 
+    //resets the bid for a new player
     public void resetBid() {
         currentBid = basePrice;
         winningTeam = null;

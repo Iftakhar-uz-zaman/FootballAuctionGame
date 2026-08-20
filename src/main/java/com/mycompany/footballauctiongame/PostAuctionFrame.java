@@ -10,18 +10,20 @@ package com.mycompany.footballauctiongame;
  */
 import javax.swing.*;
 import java.io.IOException;
+import java.awt.*;
+import java.io.File;
 
-public class PostAuctionFrame extends javax.swing.JFrame {   
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PostAuctionFrame.class.getName());
+public class PostAuctionFrame extends javax.swing.JFrame {
     private AuctionEngine engine;
-    private java.awt.CardLayout cardLayout;
+    private CardLayout cardLayout;
     private JPanel currentTeamPanel;
     
+    //creates card layout and login screen
     public PostAuctionFrame(AuctionEngine engine) {
         initComponents();
         this.engine = engine;
         setTitle("Post-Auction — Manage Teams");
-        cardLayout = new java.awt.CardLayout();
+        cardLayout = new CardLayout();
         mainContainer.setLayout(cardLayout);
         mainContainer.add(buildLoginPanel(), "login");
         cardLayout.show(mainContainer, "login");
@@ -34,11 +36,11 @@ public class PostAuctionFrame extends javax.swing.JFrame {
     //sets login panel layout
     private JPanel buildLoginPanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
-        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(40, 60, 40, 60));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
         JComboBox<Team> teamSelector = new JComboBox<>();
         for (Team team : engine.getTeams()) {
-        teamSelector.addItem(team);
+            teamSelector.addItem(team);
         }
         teamSelector.setRenderer((list, value, index, isSelected, hasFocus) -> new JLabel(value.getTeamName()));
         JPasswordField passwordField = new JPasswordField();
@@ -46,22 +48,22 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         JLabel statusLabel = new JLabel(" ");
         panel.add(new JLabel("Select your team:"));
         panel.add(teamSelector);
-        panel.add(javax.swing.Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
         panel.add(new JLabel("Password:"));
         panel.add(passwordField);
-        panel.add(javax.swing.Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
         panel.add(loginButton);
         panel.add(statusLabel);
-        panel.add(javax.swing.Box.createVerticalStrut(20));
+        panel.add(Box.createVerticalStrut(20));
         JButton leagueButton = new JButton("Run League Simulation");
         panel.add(leagueButton);
         leagueButton.addActionListener(e -> { 
             String results = engine.simulateLeague();
             JTextArea resultArea = new JTextArea(results);
             resultArea.setEditable(false);   
-            resultArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
+            resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
             JScrollPane scrollPane = new JScrollPane(resultArea);
-            scrollPane.setPreferredSize(new java.awt.Dimension(500, 400));
+            scrollPane.setPreferredSize(new Dimension(500, 400));
             JOptionPane.showMessageDialog(this,scrollPane,"League Results",JOptionPane.INFORMATION_MESSAGE);
         });
         loginButton.addActionListener(e -> {
@@ -90,11 +92,11 @@ public class PostAuctionFrame extends javax.swing.JFrame {
     
     //sets team panel screen
     private JPanel buildTeamPanel(Team team) {    
-        JPanel panel = new JPanel(new java.awt.BorderLayout(10, 10));   
-        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));    
+        JPanel panel = new JPanel(new BorderLayout(10, 10));   
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));    
         JLabel infoLabel = new JLabel();    
-        infoLabel.setFont(infoLabel.getFont().deriveFont(java.awt.Font.BOLD, 14f));    
-        panel.add(infoLabel, java.awt.BorderLayout.NORTH);    
+        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 14f));    
+        panel.add(infoLabel, BorderLayout.NORTH);    
         DefaultListModel<Player> squadModel = new DefaultListModel<>();    
         JList<Player> squadList = new JList<>(squadModel);    
         JScrollPane squadScroll = new JScrollPane(squadList);    
@@ -103,10 +105,10 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         JList<Player> availableList = new JList<>(availableModel);    
         JScrollPane availableScroll = new JScrollPane(availableList);    
         availableScroll.setBorder(BorderFactory.createTitledBorder("Available Players (buy at base price)"));
-        JPanel listsPanel = new JPanel(new java.awt.GridLayout(1, 2, 10, 10));    
+        JPanel listsPanel = new JPanel(new GridLayout(1, 2, 10, 10));    
         listsPanel.add(squadScroll);    
         listsPanel.add(availableScroll);    
-        panel.add(listsPanel, java.awt.BorderLayout.CENTER);    
+        panel.add(listsPanel, BorderLayout.CENTER);    
         JButton dropButton = new JButton("Drop Selected (50% refund)");    
         JButton buyButton = new JButton("Buy Selected (base price)");    
         JButton downloadButton = new JButton("Download Team Sheet");    
@@ -118,9 +120,9 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         controls.add(downloadButton);    
         controls.add(logoutButton);    
         JPanel south = new JPanel(new java.awt.BorderLayout());    
-        south.add(controls, java.awt.BorderLayout.NORTH);    
-        south.add(statusLabel, java.awt.BorderLayout.SOUTH);    
-        panel.add(south, java.awt.BorderLayout.SOUTH);    
+        south.add(controls, BorderLayout.NORTH);    
+        south.add(statusLabel, BorderLayout.SOUTH);    
+        panel.add(south, BorderLayout.SOUTH);    
         Runnable refresh = () -> {        
             infoLabel.setText(team.getTeamName() + "   |   Manager: " + team.getManager().getName() + "   |   Purse: " + team.getPurse() + "   |   Chemistry: " + team.getChemistry() + "   |   Fan Happiness: " + team.getFanHappiness() + "   |   Dropped: " + team.getDroppedCount() + "   |   Added: " + team.getAddedCount());        
             squadModel.clear();       
@@ -174,7 +176,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         //downloads team sheet
         downloadButton.addActionListener(e -> {        
             JFileChooser chooser = new JFileChooser();        
-            chooser.setSelectedFile(new java.io.File(team.getTeamName() + "_sheet.txt"));        
+            chooser.setSelectedFile(new File(team.getTeamName() + "_sheet.txt"));        
             int result = chooser.showSaveDialog(panel);        
             if (result == JFileChooser.APPROVE_OPTION) {            
                 try {                
@@ -233,15 +235,6 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    /*
-    public static void main(String args[]) {
-        
-        java.awt.EventQueue.invokeLater(() -> new PostAuctionFrame().setVisible(true));
-    }
-*/
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel mainContainer;
     // End of variables declaration//GEN-END:variables

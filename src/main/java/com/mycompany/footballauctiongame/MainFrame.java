@@ -4,8 +4,10 @@
  */
 package com.mycompany.footballauctiongame;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.Color;
+import java.awt.BorderLayout;
+import java.awt.Font;
 
 /**
  *
@@ -13,7 +15,6 @@ import javax.swing.JPanel;
  */
 public class MainFrame extends javax.swing.JFrame {
     private AuctionEngine engine;
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
     
     public MainFrame(AuctionEngine engine) {
     initComponents();
@@ -21,7 +22,7 @@ public class MainFrame extends javax.swing.JFrame {
     refreshScreen();
     }
     
-    //shows player info
+    //refreshes screen after any action(bid or pass)
     private void refreshScreen() {
         if (engine == null) {
             return;
@@ -40,14 +41,14 @@ public class MainFrame extends javax.swing.JFrame {
         lblOverall.setText(String.valueOf(player.getOverall()));
         lblBasePrice.setText(String.valueOf(player.getBasePrice()));
         lblCurrentBid.setText(String.valueOf(engine.getCurrentBid().getAmount()));
-        lblCurrentBid.setForeground(new java.awt.Color(0, 153, 0));
-        lblCurrentBid.setFont(lblCurrentBid.getFont().deriveFont(java.awt.Font.BOLD, 16f));
-        javax.swing.Timer flashTimer = new javax.swing.Timer(500, e -> {
-            lblCurrentBid.setForeground(java.awt.Color.BLACK);
+        lblCurrentBid.setForeground(new Color(0, 153, 0));
+        lblCurrentBid.setFont(lblCurrentBid.getFont().deriveFont(Font.BOLD, 16f));
+        Timer flashTimer = new Timer(500, e -> {
+            lblCurrentBid.setForeground(Color.BLACK);
         });
         flashTimer.setRepeats(false);
         flashTimer.start();
-        //then responds after bid or pass
+        //checks for highest bidder
         if (engine.getCurrentBid().getBidder() == null) {
             lblHighestBidder.setText("None");
         } 
@@ -62,34 +63,40 @@ public class MainFrame extends javax.swing.JFrame {
     //shows team status on side panel
     private void updateTeams() {
         teamsPanel.removeAll();
-        teamsPanel.setLayout(new javax.swing.BoxLayout(teamsPanel, javax.swing.BoxLayout.Y_AXIS));
+        teamsPanel.setLayout(new BoxLayout(teamsPanel, BoxLayout.Y_AXIS));
         for (Team team : engine.getTeams()) {
-            JPanel card = new JPanel(new java.awt.BorderLayout(5, 2));
-            card.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5), javax.swing.BorderFactory.createTitledBorder(team.getTeamName())));
+            JPanel card = new JPanel(new BorderLayout(5, 2));
+            card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5), BorderFactory.createTitledBorder(team.getTeamName())));
             JLabel managerLabel = new JLabel("Manager: " + team.getManager().getName());
-            card.add(managerLabel, java.awt.BorderLayout.NORTH);
+            card.add(managerLabel, BorderLayout.NORTH);
             JLabel moraleLabel = new JLabel("Chemistry: " + team.getChemistry() + "   |   Fan Happiness: " + team.getFanHappiness());
-            card.add(moraleLabel, java.awt.BorderLayout.SOUTH);
+            card.add(moraleLabel, BorderLayout.SOUTH);
             double startingPurse = team.getPurse() + team.getTotalSquadValue();
-            int percentLeft = startingPurse == 0 ? 0 : (int) ((team.getPurse() / startingPurse) * 100);
-            javax.swing.JProgressBar purseBar = new javax.swing.JProgressBar(0, 100);
+            int percentLeft;
+            if (startingPurse == 0) {
+                percentLeft = 0;
+            } 
+            else {
+                percentLeft = (int) ((team.getPurse() / startingPurse) * 100);
+            }
+            JProgressBar purseBar = new JProgressBar(0, 100);
             purseBar.setValue(percentLeft);
             purseBar.setStringPainted(true);
             purseBar.setString("Purse: " + team.getPurse());
             if (percentLeft < 20) {
-                purseBar.setForeground(java.awt.Color.RED);
+                purseBar.setForeground(Color.RED);
             }
             else if (percentLeft < 50) {
-                purseBar.setForeground(java.awt.Color.ORANGE);
+                purseBar.setForeground(Color.ORANGE);
             }
             else {
-                purseBar.setForeground(new java.awt.Color(0, 153, 0));
+                purseBar.setForeground(new Color(0, 153, 0));
             }
-            card.add(purseBar, java.awt.BorderLayout.CENTER);
+            card.add(purseBar, BorderLayout.CENTER);
             JLabel squadLabel = new JLabel("<html>" + team.getPlayerNames().replace("\n", "<br>") + "</html>");
-            card.add(squadLabel, java.awt.BorderLayout.SOUTH);
+            card.add(squadLabel, BorderLayout.SOUTH);
             teamsPanel.add(card);
-            teamsPanel.add(javax.swing.Box.createVerticalStrut(8));
+            teamsPanel.add(Box.createVerticalStrut(8));
         }
         teamsPanel.revalidate();
         teamsPanel.repaint();
@@ -316,7 +323,7 @@ public class MainFrame extends javax.swing.JFrame {
         refreshScreen();
     }//GEN-LAST:event_btnBidActionPerformed
 
-    //12. passes a player
+    //passes a player
     private void btnPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPassActionPerformed
         // TODO add your handling code here:
         boolean sold = engine.pass();
@@ -329,6 +336,7 @@ public class MainFrame extends javax.swing.JFrame {
     refreshScreen();
     }//GEN-LAST:event_btnPassActionPerformed
 
+    //works when manage team button is pressed
     private void btnManageTeamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageTeamsActionPerformed
         // TODO add your handling code here:
         //goes to post auction frame
@@ -337,14 +345,6 @@ public class MainFrame extends javax.swing.JFrame {
         frame.setVisible(true);
     }//GEN-LAST:event_btnManageTeamsActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    /*
-    public static void main(String args[]) {
-        
-        java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
-    }*/
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBid;

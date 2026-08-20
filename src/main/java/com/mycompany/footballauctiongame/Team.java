@@ -10,6 +10,7 @@ package com.mycompany.footballauctiongame;
  */
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Team {
     private String teamName;
@@ -20,11 +21,12 @@ public class Team {
     private int addedCount = 0;
     private int fanHappiness = 50;
     
+    //returns team chemistry: a parameter which will be used for runnig league simulation
     public int getChemistry() {
     if (squad.isEmpty()) {
         return 50;
     }
-    java.util.HashSet<String> positionsCovered = new java.util.HashSet<>();
+    HashSet<String> positionsCovered = new HashSet<>();
     for (Player p : squad) {
         positionsCovered.add(p.getPosition());
     }
@@ -43,6 +45,7 @@ public class Team {
         return fanHappiness;
     }
 
+    //initializes fan happiness condition : another parameter which is being used in league simulation
     public void initializeFanHappiness() {   
         if (squad.isEmpty()) {       
             fanHappiness = 50;        
@@ -71,18 +74,22 @@ public class Team {
         }
     }
 
+    //number of players dropped from a team after the auction finishes
     public int getDroppedCount() {
         return droppedCount;
     }
 
+    //number of players added in a team after the auction finishes
     public int getAddedCount() {    
         return addedCount;
     }
 
+    //checks if the team is eligible to add new player after auction( a player can only add same number of players they have dropped)
     public boolean canAddPlayer() {    
         return addedCount < droppedCount;
     }
 
+    //adjustments after dropping a player
     public void dropPlayer(Player player) throws PlayerNotFoundException {    
         if (!squad.contains(player)) {        
             throw new PlayerNotFoundException(player.getName() + " is not in " + teamName + "'s squad.");    
@@ -96,6 +103,7 @@ public class Team {
         player.resetBid();
     }
 
+    //runs while attempting to add player
     public void addPlayer(Player player, double price) throws SwapLimitExceededException, InsufficientPurseException {
         if (!canAddPlayer()) {        
             throw new SwapLimitExceededException(teamName + " cannot buy more players than it has dropped (" + droppedCount + " dropped, " + addedCount + " added).");    
@@ -107,6 +115,7 @@ public class Team {
         addedCount++;
     }
 
+    //stores a teams components
     public Team(String teamName, Manager manager, double purse) {
         this.teamName = teamName;
         this.manager = manager;
@@ -134,10 +143,12 @@ public class Team {
         this.purse = purse;
     }
 
+    //condition to be eligible to bid
     public boolean canBid(double amount) {
         return purse >= amount;
     }
 
+    //runs while buying a player
     public void buyPlayer(Player player, double price) {
         purse -= price;
         squad.add(player);
@@ -146,6 +157,7 @@ public class Team {
         player.setCurrentBid(price);
     }
 
+    //returns player details
     public String getPlayerNames() {    
         if (squad.isEmpty()) {        
             return "";    
@@ -157,6 +169,7 @@ public class Team {
         return players.toString();
     }
 
+    //returns the sum of total spending of a team
     public double getTotalSquadValue() {
         double total = 0;
         for (Player player : squad) {
@@ -165,6 +178,7 @@ public class Team {
         return total;
     }
     
+    //measures team strength for running simulation
     public double getTeamStrength() {    
         if (squad.isEmpty()) {       
             return 0;    

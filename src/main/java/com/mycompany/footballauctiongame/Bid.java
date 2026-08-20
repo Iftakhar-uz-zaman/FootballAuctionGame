@@ -23,26 +23,32 @@ public class Bid {
         this.amount = amount;
     }
 
+    //gets the bidding team name
     public Team getBidder() {
         return bidder;
     }
 
+    //set the bidding team name
     public void setBidder(Team bidder) {
         this.bidder = bidder;
     }
 
+    //gets the price of a player
     public double getAmount() {
         return amount;
     }
 
+    //sets the price of a player
     public void setAmount(double amount) {
         this.amount = amount;
     }
 
+    //increases the bid by 10
     public void increaseBid() {
         amount += 10;
     }
 
+    //sets the amount after increment
     public void increaseBid(double increment) {
         amount += increment;
     }
