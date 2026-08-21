@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-
+//two types of person is used in this auction: player and manager
 public abstract class Person {
     private String name;
     public Person(String name) {

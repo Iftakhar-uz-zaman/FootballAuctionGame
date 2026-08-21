@@ -8,6 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
+//controls manager details
 public class Manager extends Person {
     private String teamName;
     private String password;

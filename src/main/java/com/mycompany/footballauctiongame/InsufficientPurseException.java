@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-// InsufficientPurseException.java
+// when purse is insufficient for a purchase
 public class InsufficientPurseException extends AuctionException {
     public InsufficientPurseException(String message) {
         super(message);

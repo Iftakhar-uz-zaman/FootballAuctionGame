@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class ExcelReader {
     //loads player info from excel file
     public static ArrayList<Player> loadPlayers(String fileName) {
+        //stores the players in a dynamic array of Player type
         ArrayList<Player> players = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream(fileName);
                 Workbook workbook = new XSSFWorkbook(fis)) {
@@ -36,9 +37,11 @@ public class ExcelReader {
                     Player player = new Player(id,name,position,overall,basePrice);
                     players.add(player);
                 }
+                //when any cell of the excel sheet is missing a data
                 catch (NullPointerException e) {
                     System.out.println("Row " + (i + 1) + " contains missing data.");
                 }
+                //when we get wrong type of data from the excel sheet
                 catch (IllegalStateException e) {
                     System.out.println("Invalid data type in row " + (i + 1));
                 }

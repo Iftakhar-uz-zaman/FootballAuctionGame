@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-// PlayerNotFoundException.java
+//when a player is missing
 public class PlayerNotFoundException extends AuctionException {
     public PlayerNotFoundException(String message) {
         super(message);

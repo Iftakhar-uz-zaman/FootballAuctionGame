@@ -4,15 +4,16 @@
  */
 package com.mycompany.footballauctiongame;
 
+/**
+ *
+ * @author Lenovo
+ */
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
-/**
- *
- * @author Lenovo
- */
+//the second screen where it shows the ongoing ayction
 public class MainFrame extends javax.swing.JFrame {
     private AuctionEngine engine;
     
@@ -27,6 +28,7 @@ public class MainFrame extends javax.swing.JFrame {
         if (engine == null) {
             return;
         }
+        //when the auction is completed
         if (engine.auctionFinished()) {
             jLabel16.setText("Auction Finished!");
             btnBid.setEnabled(false);
@@ -339,7 +341,6 @@ public class MainFrame extends javax.swing.JFrame {
     //works when manage team button is pressed
     private void btnManageTeamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageTeamsActionPerformed
         // TODO add your handling code here:
-        //goes to post auction frame
         PostAuctionFrame frame = new PostAuctionFrame(engine);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

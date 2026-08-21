@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+//it controls all the action while the auction is running
 public class AuctionEngine {
     private ArrayList<Player> players;
     private ArrayList<Team> teams;
@@ -24,6 +25,7 @@ public class AuctionEngine {
     private Player currentPlayer;
     private Bid currentBid;
 
+    //runs the auction
     public AuctionEngine(ArrayList<Player> players, ArrayList<Team> teams) {
         this.players = players;
         this.teams = teams;
@@ -33,7 +35,6 @@ public class AuctionEngine {
         availablePlayers = new ArrayList<>();
         if (!players.isEmpty()) {
             currentPlayer = players.get(0);
-            //goes to bid from here
             currentBid = new Bid(null,currentPlayer.getBasePrice());
         }
     }
@@ -185,7 +186,8 @@ public class AuctionEngine {
         }   
         if (teams.size() < 2) {        
             return "Need at least 2 teams to run a league.";    
-        }   
+        }
+        //sets all teams point 0 initially
         HashMap<Team, Integer> points = new HashMap<>();   
         for (Team team : teams) {        
             points.put(team, 0);    

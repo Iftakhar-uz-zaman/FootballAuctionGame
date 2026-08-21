@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-
+//controls player info
 public class Player extends Person{
 
     private int id;

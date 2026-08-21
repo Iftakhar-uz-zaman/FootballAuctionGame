@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-// SwapLimitExceededException.java
+//a team can only add same number of players they have dropped - otherwise it will throw this exception
 public class SwapLimitExceededException extends AuctionException {
     public SwapLimitExceededException(String message) {
         super(message);

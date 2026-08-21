@@ -8,7 +8,7 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-// AuctionException.java
+// parent of all custom exceptions
 public class AuctionException extends Exception {
     public AuctionException(String message) {
         super(message);

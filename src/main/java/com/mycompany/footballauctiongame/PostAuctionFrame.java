@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.awt.*;
 import java.io.File;
 
+//the third screen where post auction activities are done
 public class PostAuctionFrame extends javax.swing.JFrame {
     private AuctionEngine engine;
     private CardLayout cardLayout;
@@ -38,6 +39,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
+        //sets the options of selecting teams from the combo box
         JComboBox<Team> teamSelector = new JComboBox<>();
         for (Team team : engine.getTeams()) {
             teamSelector.addItem(team);
@@ -57,6 +59,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         panel.add(Box.createVerticalStrut(20));
         JButton leagueButton = new JButton("Run League Simulation");
         panel.add(leagueButton);
+        //when run league simulation button is pressed
         leagueButton.addActionListener(e -> { 
             String results = engine.simulateLeague();
             JTextArea resultArea = new JTextArea(results);
@@ -66,6 +69,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
             scrollPane.setPreferredSize(new Dimension(500, 400));
             JOptionPane.showMessageDialog(this,scrollPane,"League Results",JOptionPane.INFORMATION_MESSAGE);
         });
+        //checks the given password and lets the manager login to his team panel
         loginButton.addActionListener(e -> {
             Team selectedTeam = (Team) teamSelector.getSelectedItem();        
             String attempt = new String(passwordField.getPassword());       
@@ -77,7 +81,7 @@ public class PostAuctionFrame extends javax.swing.JFrame {
                 statusLabel.setText("Incorrect password.");           
                 passwordField.setText("");            
                 return;        
-            }        
+            }
             if (currentTeamPanel != null) {            
                 mainContainer.remove(currentTeamPanel);        
             }        
@@ -122,7 +126,8 @@ public class PostAuctionFrame extends javax.swing.JFrame {
         JPanel south = new JPanel(new java.awt.BorderLayout());    
         south.add(controls, BorderLayout.NORTH);    
         south.add(statusLabel, BorderLayout.SOUTH);    
-        panel.add(south, BorderLayout.SOUTH);    
+        panel.add(south, BorderLayout.SOUTH);
+        //shows updated info after any action in the team panel screen
         Runnable refresh = () -> {        
             infoLabel.setText(team.getTeamName() + "   |   Manager: " + team.getManager().getName() + "   |   Purse: " + team.getPurse() + "   |   Chemistry: " + team.getChemistry() + "   |   Fan Happiness: " + team.getFanHappiness() + "   |   Dropped: " + team.getDroppedCount() + "   |   Added: " + team.getAddedCount());        
             squadModel.clear();       
@@ -162,9 +167,11 @@ public class PostAuctionFrame extends javax.swing.JFrame {
                 engine.buyAvailablePlayer(team, selected);            
                 statusLabel.setText(selected.getName() + " added at base price " + selected.getBasePrice() + ".");        
             }
+            //a team can only add same number of players they have dropped - otherwise it will throw this exception
             catch (SwapLimitExceededException ex) {           
                 statusLabel.setText("Error: " + ex.getMessage());       
             }
+            //when there is not enough fund available to buy the selected player
             catch (InsufficientPurseException ex) {            
                 statusLabel.setText("Error: " + ex.getMessage());        
             }

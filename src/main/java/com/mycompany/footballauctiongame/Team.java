@@ -12,6 +12,7 @@ package com.mycompany.footballauctiongame;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+//controls team info
 public class Team {
     private String teamName;
     private Manager manager;
@@ -26,6 +27,7 @@ public class Team {
     if (squad.isEmpty()) {
         return 50;
     }
+    //team chemistry increases with every positon that is covered (i.e. if a team is missing gk and they add their 1st GK to their squad the chemistry will increase by 5)
     HashSet<String> positionsCovered = new HashSet<>();
     for (Player p : squad) {
         positionsCovered.add(p.getPosition());

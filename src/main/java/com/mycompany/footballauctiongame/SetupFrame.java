@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
+//first screen that appears to get all the auction details
 public class SetupFrame extends javax.swing.JFrame {
     private ArrayList<Team> teams = new ArrayList<>();
     private ArrayList<JPasswordField> passwordFields = new ArrayList<>();
@@ -158,17 +159,19 @@ public class SetupFrame extends javax.swing.JFrame {
     //sets the number of teams
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
 
+        //at least two teams are needed to start the auction
         int numberOfTeams = (Integer) spnTeams.getValue();
         if (numberOfTeams < 2) {
             JOptionPane.showMessageDialog(this,"At least 2 teams are required.");
             return;
         }
+        //removes all the existing info from the screen if numberOfTeams is being altered
         teamPanel.removeAll();
         teamFields.clear();
         managerFields.clear();
         purseFields.clear();
         passwordFields.clear();
-        //sets team info
+        //creates the empty white boxes to give input
         for (int i = 1; i <= numberOfTeams; i++) {
             JTextField teamField = new JTextField();
             JTextField managerField = new JTextField();
@@ -189,15 +192,17 @@ public class SetupFrame extends javax.swing.JFrame {
         teamPanel.repaint();
     }//GEN-LAST:event_btnCreateActionPerformed
 
-    //Start Auction button performed
+    //start auction button performed
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // TODO add your handling code here:
         teams.clear();
+        //takes all the details that are provided in the set up frame
         for (int i = 0; i < teamFields.size(); i++) {
             String teamName = teamFields.get(i).getText().trim();
             String managerName = managerFields.get(i).getText().trim();
             String purseText = purseFields.get(i).getText().trim();
             String password = new String(passwordFields.get(i).getPassword()).trim();
+            //if start auction button is pressed leaving any box empty
             if (teamName.isEmpty() || managerName.isEmpty() || purseText.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(this,"Please fill all fields.");
                 return;
@@ -208,7 +213,8 @@ public class SetupFrame extends javax.swing.JFrame {
                 if (purse <= 0) {
                     throw new NumberFormatException();
                 }
-            } 
+            }
+            //if any other data type but integer is given in the purse field
             catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this,"Invalid purse for Team " + (i + 1));
                 return;

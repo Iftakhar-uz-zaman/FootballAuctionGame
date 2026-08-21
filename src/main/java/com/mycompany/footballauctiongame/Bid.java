@@ -8,15 +8,10 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-
+//it control what to do when a bid is placed
 public class Bid {
-    private Team bidder;
-    private double amount;
-    
-    public Bid() {
-        bidder = null;
-        amount = 0;
-    }
+    private Team bidder = null;
+    private double amount = 0;
 
     public Bid(Team bidder, double amount) {
         this.bidder = bidder;
@@ -28,7 +23,7 @@ public class Bid {
         return bidder;
     }
 
-    //set the bidding team name
+    //sets the bidding team name
     public void setBidder(Team bidder) {
         this.bidder = bidder;
     }
@@ -48,7 +43,7 @@ public class Bid {
         amount += 10;
     }
 
-    //sets the amount after increment
+    //sets the new amount after increment
     public void increaseBid(double increment) {
         amount += increment;
     }
