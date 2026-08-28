@@ -9,7 +9,7 @@ package com.mycompany.footballauctiongame;
  * @author Lenovo
  */
 //controls manager details
-public class Manager extends Person {
+public class Manager extends Person implements java.io.Serializable{
     private String teamName;
     private String password;
     

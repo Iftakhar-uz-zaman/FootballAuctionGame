@@ -195,43 +195,77 @@ public class SetupFrame extends javax.swing.JFrame {
     //start auction button performed
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // TODO add your handling code here:
-        teams.clear();
-        //takes all the details that are provided in the set up frame
-        for (int i = 0; i < teamFields.size(); i++) {
-            String teamName = teamFields.get(i).getText().trim();
-            String managerName = managerFields.get(i).getText().trim();
-            String purseText = purseFields.get(i).getText().trim();
-            String password = new String(passwordFields.get(i).getPassword()).trim();
-            //if start auction button is pressed leaving any box empty
-            if (teamName.isEmpty() || managerName.isEmpty() || purseText.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(this,"Please fill all fields.");
-                return;
-            }
-            double purse;
-            try {
-                purse = Double.parseDouble(purseText);
-                if (purse <= 0) {
-                    throw new NumberFormatException();
-                }
-            }
-            //if any other data type but integer is given in the purse field
-            catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this,"Invalid purse for Team " + (i + 1));
-                return;
-            }
-            teams.add(new Team(teamName,new Manager(managerName, teamName, password),purse));
-        }
-        //loads players from excel file
-        ArrayList<Player> players = ExcelReader.loadPlayers("players.xlsx");
-        if (players.isEmpty()) {
-            JOptionPane.showMessageDialog(this,"No players found!");
+    teams.clear();
+
+    for (int i = 0; i < teamFields.size(); i++) {
+
+        String teamName = teamFields.get(i).getText().trim();
+        String managerName = managerFields.get(i).getText().trim();
+        String purseText = purseFields.get(i).getText().trim();
+        String password = new String(passwordFields.get(i).getPassword()).trim();
+
+        if (teamName.isEmpty() || managerName.isEmpty()
+                || purseText.isEmpty() || password.isEmpty()) {
+
+            JOptionPane.showMessageDialog(this, "Please fill all fields.");
             return;
         }
-        AuctionEngine engine = new AuctionEngine(players, teams);
-        MainFrame frame = new MainFrame(engine);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        dispose();
+
+        double purse;
+
+        try {
+            purse = Double.parseDouble(purseText);
+
+            if (purse <= 0) {
+                throw new NumberFormatException();
+            }
+
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(this, "Invalid purse for Team " + (i + 1));
+            return;
+        }
+
+        teams.add(new Team(teamName, new Manager(managerName, teamName, password), purse));
+    }
+
+    if (teams.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please create at least one team.");
+        return;
+    }
+
+    ArrayList<Player> players = ExcelReader.loadPlayers("players.xlsx");
+
+    if (players.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No players found!");
+        return;
+    }
+
+    AuctionEngine engine = new AuctionEngine(players, teams);
+    GameServer server = new GameServer(engine);
+
+    Thread serverThread = new Thread(() -> server.start());
+    serverThread.setDaemon(true);
+    serverThread.start();
+
+    String ip;
+
+    try {
+        ip = java.net.InetAddress.getLocalHost().getHostAddress();
+    } catch (java.net.UnknownHostException e) {
+        ip = "unknown — check manually";
+    }
+
+    JOptionPane.showMessageDialog(
+            this,
+            "Server started!\nOther managers connect to:\nIP: " + ip + "\nPort: 5555"
+    );
+
+    JoinFrame joinFrame = new JoinFrame(ip);
+    joinFrame.setLocationRelativeTo(null);
+    joinFrame.setVisible(true);
+
+    dispose();
     }//GEN-LAST:event_btnStartActionPerformed
 
     /**

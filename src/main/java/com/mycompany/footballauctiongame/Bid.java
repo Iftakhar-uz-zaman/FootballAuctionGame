@@ -9,7 +9,7 @@ package com.mycompany.footballauctiongame;
  * @author Lenovo
  */
 //it control what to do when a bid is placed
-public class Bid {
+public class Bid implements java.io.Serializable{
     private Team bidder = null;
     private double amount = 0;
 

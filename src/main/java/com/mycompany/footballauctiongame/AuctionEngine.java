@@ -20,18 +20,68 @@ public class AuctionEngine {
     private ArrayList<Player> availablePlayers;
     private String leagueResults = null;
     private int currentPlayerIndex;
-    private int currentTeamIndex;
-    private int passCount;
     private Player currentPlayer;
     private Bid currentBid;
+    private static final int BID_DURATION_SECONDS = 15;
+private int secondsRemaining;
+
+public synchronized ServerResponse bid(Team team) {
+
+    if (auctionFinished()) {
+        return new ServerResponse(false, "Auction has finished.");
+    }
+
+    double nextPrice = currentBid.getAmount() + 10;
+
+    if (!team.canBid(nextPrice)) {
+        return new ServerResponse(false, "Not enough purse.");
+    }
+
+    currentBid.increaseBid();
+    currentBid.setBidder(team);
+
+    currentPlayer.setCurrentBid(currentBid.getAmount());
+    currentPlayer.setWinningTeam(team);
+
+    secondsRemaining = BID_DURATION_SECONDS; // any bid resets the clock
+
+    return new ServerResponse(true, team.getTeamName() + " bids " + currentBid.getAmount());
+}
+
+
+
+public int getSecondsRemaining() {
+    return secondsRemaining;
+}
+
+public void tickCountdown() {
+
+    secondsRemaining--;
+
+    if (secondsRemaining <= 0) {
+        resolveCurrentPlayer();
+    }
+}
+
+private void resolveCurrentPlayer() {
+
+    if (currentBid.getBidder() != null) {
+        sellPlayer();
+    } else {
+        availablePlayers.add(currentPlayer);
+        nextPlayer();
+    }
+
+    if (!auctionFinished()) {
+        secondsRemaining = BID_DURATION_SECONDS;
+    }
+}
 
     //runs the auction
     public AuctionEngine(ArrayList<Player> players, ArrayList<Team> teams) {
         this.players = players;
         this.teams = teams;
         currentPlayerIndex = 0;
-        currentTeamIndex = 0;
-        passCount = 0;
         availablePlayers = new ArrayList<>();
         if (!players.isEmpty()) {
             currentPlayer = players.get(0);
@@ -47,10 +97,6 @@ public class AuctionEngine {
         return currentBid;
     }
 
-    public Team getCurrentTeam() {
-        return teams.get(currentTeamIndex);
-    }
-
     public ArrayList<Team> getTeams() {
         return teams;
     }
@@ -60,50 +106,6 @@ public class AuctionEngine {
         return currentPlayerIndex >= players.size();
     }
 
-    //calls the index for next team
-    private void nextTeam() {
-        currentTeamIndex++;
-        if (currentTeamIndex >= teams.size()) {
-            currentTeamIndex = 0;
-        }
-    }
-
-    //proceeds or declines a bid made by a team
-    public boolean bid() {
-        Team team = getCurrentTeam();
-        double nextPrice = currentBid.getAmount() + 10;
-        if (!team.canBid(nextPrice)) {
-            JOptionPane.showMessageDialog(null,team.getTeamName() + " does not have enough purse.","Insufficient Funds",JOptionPane.WARNING_MESSAGE);
-            nextTeam();
-            return false;
-        }
-        currentBid.increaseBid();
-        currentBid.setBidder(team);
-        currentPlayer.setCurrentBid(currentBid.getAmount());
-        currentPlayer.setWinningTeam(team);
-        passCount = 0;
-        nextTeam();
-        return true;
-    }
-
-    //proceeds when a team passes a player
-    public boolean pass() {
-        passCount++;
-        // Everyone passed without any bid
-        if (passCount >= teams.size() && currentBid.getBidder() == null) {
-            System.out.println(currentPlayer.getName() + " remained UNSOLD.");
-            availablePlayers.add(currentPlayer);
-            nextPlayer();
-            return true;
-        }       
-        // Everyone except highest bidder passed
-        if (currentBid.getBidder() != null && passCount >= teams.size() - 1) {
-            sellPlayer();
-            return true;
-        }
-        nextTeam();
-        return false;        
-   }
     
     public ArrayList<Player> getAvailablePlayers() {
         return availablePlayers;
@@ -130,7 +132,7 @@ public class AuctionEngine {
         if (winner != null) {
             winner.buyPlayer(currentPlayer,currentBid.getAmount());
             System.out.println();
-            javax.swing.JOptionPane.showMessageDialog(null,currentPlayer.getName() + "\nSold To : " + winner.getTeamName() + "\nPrice : " + currentBid.getAmount(),"Player Sold", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            
             System.out.println("Player : " + currentPlayer.getName());
             System.out.println("Winner : " + winner.getTeamName());
             System.out.println("Price : " + currentBid.getAmount());
@@ -152,8 +154,6 @@ public class AuctionEngine {
         }
         currentPlayer = players.get(currentPlayerIndex);
         currentBid = new Bid(null,currentPlayer.getBasePrice());
-        currentTeamIndex = 0;
-        passCount = 0;
     }
 
     //shows ongoing player who is being auctioned
@@ -175,7 +175,6 @@ public class AuctionEngine {
             System.out.println("Highest Bidder : " + currentBid.getBidder().getTeamName());
         }
         System.out.println();
-        System.out.println("Current Turn : " + getCurrentTeam().getTeamName());
         System.out.println("-----------------------------------");
     }
 

@@ -9,7 +9,7 @@ package com.mycompany.footballauctiongame;
  * @author Lenovo
  */
 //controls player info
-public class Player extends Person{
+public class Player extends Person implements java.io.Serializable{
 
     private int id;
     private String position;

@@ -14,194 +14,175 @@ import java.awt.*;
 import java.io.File;
 
 //the third screen where post auction activities are done
-public class PostAuctionFrame extends javax.swing.JFrame {
-    private AuctionEngine engine;
-    private CardLayout cardLayout;
-    private JPanel currentTeamPanel;
+public class PostAuctionFrame extends javax.swing.JFrame implements ServerConnection.GameStateListener{
+    private ServerConnection connection;
+    private String myTeamName;
+    private Team myTeam;
+
+    private JLabel infoLabel;
+    private DefaultListModel<Player> squadModel = new DefaultListModel<>();
+    private JList<Player> squadList = new JList<>(squadModel);
+    private DefaultListModel<Player> availableModel = new DefaultListModel<>();
+    private JList<Player> availableList = new JList<>(availableModel);
+    private JLabel statusLabel = new JLabel(" ");
     
     //creates card layout and login screen
-    public PostAuctionFrame(AuctionEngine engine) {
+    public PostAuctionFrame(ServerConnection connection, String myTeamName, GameStateUpdate initialState) {
         initComponents();
-        this.engine = engine;
-        setTitle("Post-Auction — Manage Teams");
-        cardLayout = new CardLayout();
-        mainContainer.setLayout(cardLayout);
-        mainContainer.add(buildLoginPanel(), "login");
-        cardLayout.show(mainContainer, "login");
+        this.connection = connection;
+        this.myTeamName = myTeamName;
+
+        setTitle("Manage Team — " + myTeamName);
+
+        mainContainer.setLayout(new java.awt.BorderLayout(10, 10));
+        mainContainer.add(buildPanel(), java.awt.BorderLayout.CENTER);
+
+        connection.addListener(this);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                connection.removeListener(PostAuctionFrame.this);
+            }
+        });
+        applyState(initialState);
     }
     
     public PostAuctionFrame() {
         initComponents();
     }
 
-    //sets login panel layout
-    private JPanel buildLoginPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
-        //sets the options of selecting teams from the combo box
-        JComboBox<Team> teamSelector = new JComboBox<>();
-        for (Team team : engine.getTeams()) {
-            teamSelector.addItem(team);
-        }
-        teamSelector.setRenderer((list, value, index, isSelected, hasFocus) -> new JLabel(value.getTeamName()));
-        JPasswordField passwordField = new JPasswordField();
-        JButton loginButton = new JButton("Login");
-        JLabel statusLabel = new JLabel(" ");
-        panel.add(new JLabel("Select your team:"));
-        panel.add(teamSelector);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(new JLabel("Password:"));
-        panel.add(passwordField);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(loginButton);
-        panel.add(statusLabel);
-        panel.add(Box.createVerticalStrut(20));
+    private JPanel buildPanel() {
+
+        JPanel panel = new JPanel(new java.awt.BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        infoLabel = new JLabel();
+        infoLabel.setFont(infoLabel.getFont().deriveFont(java.awt.Font.BOLD, 14f));
+        panel.add(infoLabel, java.awt.BorderLayout.NORTH);
+
+        JScrollPane squadScroll = new JScrollPane(squadList);
+        squadScroll.setBorder(BorderFactory.createTitledBorder("Squad"));
+
+        JScrollPane availableScroll = new JScrollPane(availableList);
+        availableScroll.setBorder(BorderFactory.createTitledBorder("Available Players (base price)"));
+        
+        JPanel listsPanel = new JPanel(new java.awt.GridLayout(1, 2, 10, 10));
+        listsPanel.add(squadScroll);
+        listsPanel.add(availableScroll);
+        panel.add(listsPanel, java.awt.BorderLayout.CENTER);
+
+        JButton dropButton = new JButton("Drop Selected (50% refund)");
+        JButton buyButton = new JButton("Buy Selected (base price)");
+        JButton downloadButton = new JButton("Download Team Sheet");
         JButton leagueButton = new JButton("Run League Simulation");
-        panel.add(leagueButton);
-        //when run league simulation button is pressed
-        leagueButton.addActionListener(e -> { 
-            String results = engine.simulateLeague();
-            JTextArea resultArea = new JTextArea(results);
-            resultArea.setEditable(false);   
-            resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            JScrollPane scrollPane = new JScrollPane(resultArea);
-            scrollPane.setPreferredSize(new Dimension(500, 400));
-            JOptionPane.showMessageDialog(this,scrollPane,"League Results",JOptionPane.INFORMATION_MESSAGE);
+
+        JPanel controls = new JPanel();
+        controls.add(dropButton);
+        controls.add(buyButton);
+        controls.add(downloadButton);
+        controls.add(leagueButton);
+        
+        JPanel south = new JPanel(new java.awt.BorderLayout());
+        south.add(controls, java.awt.BorderLayout.NORTH);
+        south.add(statusLabel, java.awt.BorderLayout.SOUTH);
+        panel.add(south, java.awt.BorderLayout.SOUTH);
+
+        dropButton.addActionListener(e -> {
+
+            Player selected = squadList.getSelectedValue();
+
+            if (selected == null) {
+                statusLabel.setText("Select a player from your squad first.");
+                return;
+            }
+
+            connection.sendDropPlayer(selected.getId());
         });
-        //checks the given password and lets the manager login to his team panel
-        loginButton.addActionListener(e -> {
-            Team selectedTeam = (Team) teamSelector.getSelectedItem();        
-            String attempt = new String(passwordField.getPassword());       
-            if (selectedTeam == null) {            
-                statusLabel.setText("No teams available.");           
-                return;        
+        
+        buyButton.addActionListener(e -> {
+
+            Player selected = availableList.getSelectedValue();
+
+            if (selected == null) {
+                statusLabel.setText("Select an available player first.");
+                return;
             }
-            if (!selectedTeam.getManager().checkPassword(attempt)) {            
-                statusLabel.setText("Incorrect password.");           
-                passwordField.setText("");            
-                return;        
+
+            connection.sendBuyPlayer(selected.getId());
+        });
+        
+        downloadButton.addActionListener(e -> {
+
+            if (myTeam == null) {
+                statusLabel.setText("No team data yet.");
+                return;
             }
-            if (currentTeamPanel != null) {            
-                mainContainer.remove(currentTeamPanel);        
-            }        
-            currentTeamPanel = buildTeamPanel(selectedTeam);        
-            mainContainer.add(currentTeamPanel, "team");        
-            cardLayout.show(mainContainer, "team");        
-            passwordField.setText("");        
-            statusLabel.setText(" ");        
-        });    
+
+            JFileChooser chooser = new JFileChooser();
+            chooser.setSelectedFile(new java.io.File(myTeam.getTeamName() + "_sheet.txt"));
+
+            int result = chooser.showSaveDialog(panel);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                try {
+                    TeamSheetExporter.exportTeamSheet(myTeam, chooser.getSelectedFile());
+                    statusLabel.setText("Team sheet saved.");
+                } catch (IOException ex) {
+                    statusLabel.setText("Error saving file: " + ex.getMessage());
+                }
+                }
+        });
+
+        leagueButton.addActionListener(e -> connection.sendRunLeague());
+
         return panel;
     }
     
-    //sets team panel screen
-    private JPanel buildTeamPanel(Team team) {    
-        JPanel panel = new JPanel(new BorderLayout(10, 10));   
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));    
-        JLabel infoLabel = new JLabel();    
-        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 14f));    
-        panel.add(infoLabel, BorderLayout.NORTH);    
-        DefaultListModel<Player> squadModel = new DefaultListModel<>();    
-        JList<Player> squadList = new JList<>(squadModel);    
-        JScrollPane squadScroll = new JScrollPane(squadList);    
-        squadScroll.setBorder(BorderFactory.createTitledBorder("Squad"));    
-        DefaultListModel<Player> availableModel = new DefaultListModel<>();    
-        JList<Player> availableList = new JList<>(availableModel);    
-        JScrollPane availableScroll = new JScrollPane(availableList);    
-        availableScroll.setBorder(BorderFactory.createTitledBorder("Available Players (buy at base price)"));
-        JPanel listsPanel = new JPanel(new GridLayout(1, 2, 10, 10));    
-        listsPanel.add(squadScroll);    
-        listsPanel.add(availableScroll);    
-        panel.add(listsPanel, BorderLayout.CENTER);    
-        JButton dropButton = new JButton("Drop Selected (50% refund)");    
-        JButton buyButton = new JButton("Buy Selected (base price)");    
-        JButton downloadButton = new JButton("Download Team Sheet");    
-        JButton logoutButton = new JButton("Logout");    
-        JLabel statusLabel = new JLabel(" ");    
-        JPanel controls = new JPanel();    
-        controls.add(dropButton);    
-        controls.add(buyButton);   
-        controls.add(downloadButton);    
-        controls.add(logoutButton);    
-        JPanel south = new JPanel(new java.awt.BorderLayout());    
-        south.add(controls, BorderLayout.NORTH);    
-        south.add(statusLabel, BorderLayout.SOUTH);    
-        panel.add(south, BorderLayout.SOUTH);
-        //shows updated info after any action in the team panel screen
-        Runnable refresh = () -> {        
-            infoLabel.setText(team.getTeamName() + "   |   Manager: " + team.getManager().getName() + "   |   Purse: " + team.getPurse() + "   |   Chemistry: " + team.getChemistry() + "   |   Fan Happiness: " + team.getFanHappiness() + "   |   Dropped: " + team.getDroppedCount() + "   |   Added: " + team.getAddedCount());        
-            squadModel.clear();       
-            for (Player p : team.getSquad()) {           
-                squadModel.addElement(p);
-            }        
-            availableModel.clear();        
-            for (Player p : engine.getAvailablePlayers()) {            
-                availableModel.addElement(p);        
-            }        
-        };    
-        refresh.run();
-        //works when dropping a player
-        dropButton.addActionListener(e -> {        
-            Player selected = squadList.getSelectedValue();        
-            if (selected == null) {            
-                statusLabel.setText("Select a player from your squad first.");            
-                return;
-            }        
-            try {
-                engine.dropPlayerFromTeam(team, selected);            
-                statusLabel.setText(selected.getName() + " dropped. Refund added to purse.");        
+    private void applyState(GameStateUpdate update) {
+
+        for (Team team : update.getTeams()) {
+            if (team.getTeamName().equals(myTeamName)) {
+                myTeam = team;
+                break;
             }
-            catch (PlayerNotFoundException ex) {            
-                statusLabel.setText("Error: " + ex.getMessage());        
-            }        
-            refresh.run();    
-        });
-        //works while adding a player
-        buyButton.addActionListener(e -> {            
-            Player selected = availableList.getSelectedValue();       
-            if (selected == null) {            
-                statusLabel.setText("Select an available player first.");            
-                return;        
-            }        
-            try {            
-                engine.buyAvailablePlayer(team, selected);            
-                statusLabel.setText(selected.getName() + " added at base price " + selected.getBasePrice() + ".");        
-            }
-            //a team can only add same number of players they have dropped - otherwise it will throw this exception
-            catch (SwapLimitExceededException ex) {           
-                statusLabel.setText("Error: " + ex.getMessage());       
-            }
-            //when there is not enough fund available to buy the selected player
-            catch (InsufficientPurseException ex) {            
-                statusLabel.setText("Error: " + ex.getMessage());        
-            }
-            catch (PlayerNotFoundException ex) {            
-                statusLabel.setText("Error: " + ex.getMessage());        
-            }        
-            refresh.run();    
-        });
-        //downloads team sheet
-        downloadButton.addActionListener(e -> {        
-            JFileChooser chooser = new JFileChooser();        
-            chooser.setSelectedFile(new File(team.getTeamName() + "_sheet.txt"));        
-            int result = chooser.showSaveDialog(panel);        
-            if (result == JFileChooser.APPROVE_OPTION) {            
-                try {                
-                    TeamSheetExporter.exportTeamSheet(team, chooser.getSelectedFile());                
-                    statusLabel.setText("Team sheet saved.");            
-                }
-                catch (IOException ex) {                
-                    statusLabel.setText("Error saving file: " + ex.getMessage());           
-                }       
-            }    
-        });
-        //logouts the manager
-        logoutButton.addActionListener(e -> {        
-            mainContainer.remove(panel);        
-            currentTeamPanel = null;        
-            cardLayout.show(mainContainer, "login");    
-        });    
-        return panel;
+        }
+
+        if (myTeam == null) {
+            statusLabel.setText("Could not find your team in server data.");
+            return;
+        }
+        
+        infoLabel.setText(
+                myTeam.getTeamName()
+                + "   |   Manager: " + myTeam.getManager().getName()
+                + "   |   Purse: " + myTeam.getPurse()
+                + "   |   Chemistry: " + myTeam.getChemistry()
+                + "   |   Fan Happiness: " + myTeam.getFanHappiness()
+                + "   |   Dropped: " + myTeam.getDroppedCount()
+                + "   |   Added: " + myTeam.getAddedCount()
+        );
+
+        squadModel.clear();
+        for (Player p : myTeam.getSquad()) {
+            squadModel.addElement(p);
+        }
+        availableModel.clear();
+        for (Player p : update.getAvailablePlayers()) {
+            availableModel.addElement(p);
+        }
+    }
+
+    @Override
+    public void onStateUpdate(GameStateUpdate update) {
+        javax.swing.SwingUtilities.invokeLater(() -> applyState(update));
+    }
+
+    @Override
+    public void onResponse(ServerResponse response) {
+        javax.swing.SwingUtilities.invokeLater(() -> statusLabel.setText(response.getStatusMessage()));
+    }
+    public void onDisconnected(String reason) {
+        javax.swing.SwingUtilities.invokeLater(() -> statusLabel.setText(reason));
     }
     
     /**

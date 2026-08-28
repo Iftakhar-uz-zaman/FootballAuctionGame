@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 //controls team info
-public class Team {
+public class Team implements java.io.Serializable{
     private String teamName;
     private Manager manager;
     private double purse;
