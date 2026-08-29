@@ -80,6 +80,7 @@ public void removeListener(GameStateListener listener) {
             out.writeObject(message);
             out.flush();
         } catch (IOException e) {
+            e.printStackTrace();
             for (GameStateListener l : new ArrayList<>(listeners)) {
             l.onDisconnected("Lost connection to server.");
         }
@@ -111,7 +112,7 @@ public void removeListener(GameStateListener listener) {
             }
 
         } catch (IOException | ClassNotFoundException e) {
-
+            e.printStackTrace();
             for (GameStateListener l : new ArrayList<>(listeners)) {
                 l.onDisconnected("Server closed the connection.");
             }

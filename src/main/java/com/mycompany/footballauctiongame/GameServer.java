@@ -119,24 +119,30 @@ public class GameServer {
 
     private void startCountdownThread() {
 
-        Thread countdownThread = new Thread(() -> {
+    Thread countdownThread = new Thread(() -> {
 
-            while (true) {
+        while (true) {
 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    return;
-                }
-
-                if (!engine.auctionFinished()) {
-                    engine.tickCountdown();
-                    broadcastState();
-                }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                return;
             }
-        });
 
-        countdownThread.setDaemon(true);
-        countdownThread.start();
-    }
+            boolean allTeamsPresent;
+
+            synchronized (lock) {
+                allTeamsPresent = clients.size() >= engine.getTeams().size();
+            }
+
+            if (allTeamsPresent && !engine.auctionFinished()) {
+                engine.tickCountdown();
+                broadcastState();
+            }
+        }
+    });
+
+    countdownThread.setDaemon(true);
+    countdownThread.start();
+}
 }

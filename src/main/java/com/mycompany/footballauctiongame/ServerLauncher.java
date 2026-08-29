@@ -18,7 +18,7 @@ public class ServerLauncher {
 
     public static void main(String[] args) {
 
-        ArrayList<Team> teams = loadTeamsFromFile("teams.txt");
+        ArrayList<Team> teams = loadTeamsFromFile("team_setup.txt");
 
         if (teams.isEmpty()) {
             System.out.println("No valid teams found in teams.txt. Exiting.");

@@ -1,0 +1,3 @@
+Red FC,Alice,1000,pass1
+Blue FC,Bob,1000,pass2
+Green FC,Charlie,1000,pass3
