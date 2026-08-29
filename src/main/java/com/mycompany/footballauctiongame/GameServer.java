@@ -86,7 +86,8 @@ public class GameServer {
                 engine.getCurrentBid() == null ? 0 : engine.getCurrentBid().getAmount(),
                 bidderName,
                 engine.getSecondsRemaining(),
-                engine.auctionFinished()
+                engine.auctionFinished(),
+                engine.isPaused()
         );
     }
 
@@ -121,6 +122,7 @@ public class GameServer {
 
     Thread countdownThread = new Thread(() -> {
 
+        
         while (true) {
 
             try {
@@ -135,7 +137,7 @@ public class GameServer {
                 allTeamsPresent = clients.size() >= engine.getTeams().size();
             }
 
-            if (allTeamsPresent && !engine.auctionFinished()) {
+            if (allTeamsPresent && !engine.auctionFinished() && !engine.isPaused()) {
                 engine.tickCountdown();
                 broadcastState();
             }

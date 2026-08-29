@@ -51,6 +51,7 @@ public class MainFrame extends javax.swing.JFrame implements ServerConnection.Ga
 
             lblPlayerName.setText("Auction Finished!");
             btnBid.setEnabled(false);
+            btnPass.setEnabled(false);
             btnManageTeams.setEnabled(true);
 
             updateTeams(update.getTeams());
@@ -65,7 +66,10 @@ public class MainFrame extends javax.swing.JFrame implements ServerConnection.Ga
         lblCurrentBid.setText(String.valueOf(update.getCurrentBidAmount()));
         lblHighestBidder.setText(update.getCurrentBidderName());
         lblCurrentTurn.setText(update.getSecondsRemaining() + "s");
-
+        boolean isHighestBidder = myTeamName.equals(update.getCurrentBidderName());
+        btnPass.setEnabled(!isHighestBidder);
+        btnBid.setEnabled(!isHighestBidder);
+        lblCurrentTurn.setText(update.isPaused() ? "PAUSED" : update.getSecondsRemaining() + "s");
         updateTeams(update.getTeams());
     }
     private void updateTeams(java.util.ArrayList<Team> teams) {
@@ -152,6 +156,8 @@ public class MainFrame extends javax.swing.JFrame implements ServerConnection.Ga
         btnManageTeams = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         teamsPanel = new javax.swing.JPanel();
+        btnPass = new javax.swing.JButton();
+        btnPause = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Football Auction Game");
@@ -224,56 +230,72 @@ public class MainFrame extends javax.swing.JFrame implements ServerConnection.Ga
 
         jScrollPane2.setViewportView(teamsPanel);
 
+        btnPass.setBackground(new java.awt.Color(255, 51, 51));
+        btnPass.setText("Pass");
+        btnPass.addActionListener(this::btnPassActionPerformed);
+
+        btnPause.setText("Pause");
+        btnPause.addActionListener(this::btnPauseActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGap(28, 28, 28)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel2)
-                                        .addComponent(jLabel3)
-                                        .addComponent(jLabel4)
-                                        .addComponent(jLabel5)
-                                        .addComponent(jLabel6)
-                                        .addComponent(jLabel7)
-                                        .addComponent(jLabel1))
-                                    .addGap(77, 77, 77)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(lblCurrentTurn)
-                                        .addComponent(lblHighestBidder)
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(lblPlayerName)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jLabel8))
-                                        .addComponent(lblCurrentBid)
-                                        .addComponent(lblBasePrice)
-                                        .addComponent(lblOverall)
-                                        .addComponent(lblPosition)))
-                                .addComponent(btnBid)))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addGap(33, 33, 33)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGap(6, 6, 6)
-                                    .addComponent(btnManageTeams))
-                                .addComponent(jLabel9))
-                            .addGap(34, 34, 34)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(33, 33, 33)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(btnManageTeams))
+                            .addComponent(jLabel9))
+                        .addGap(34, 34, 34))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(88, 88, 88)
-                        .addComponent(jLabel16)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(28, 28, 28)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel2)
+                                            .addComponent(jLabel3)
+                                            .addComponent(jLabel4)
+                                            .addComponent(jLabel5)
+                                            .addComponent(jLabel6)
+                                            .addComponent(jLabel7)
+                                            .addComponent(jLabel1))
+                                        .addGap(77, 77, 77)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(lblCurrentTurn)
+                                            .addComponent(lblHighestBidder)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(lblPlayerName)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jLabel8))
+                                            .addComponent(lblCurrentBid)
+                                            .addComponent(lblBasePrice)
+                                            .addComponent(lblOverall)
+                                            .addComponent(lblPosition)))
+                                    .addComponent(btnBid)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(btnPass)
+                                        .addGap(6, 6, 6))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(btnPause, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(79, 79, 79)
+                                .addComponent(jLabel16)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addComponent(jScrollPane2))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(28, 28, 28)
+                .addContainerGap()
+                .addComponent(btnPause, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnManageTeams)
@@ -308,9 +330,11 @@ public class MainFrame extends javax.swing.JFrame implements ServerConnection.Ga
                             .addComponent(jLabel7)
                             .addComponent(lblCurrentTurn))
                         .addGap(18, 18, 18)
-                        .addComponent(btnBid))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnBid)
+                            .addComponent(btnPass)))
                     .addComponent(jLabel8))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel16)
                 .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -333,10 +357,22 @@ public class MainFrame extends javax.swing.JFrame implements ServerConnection.Ga
     frame.setVisible(true);
     }//GEN-LAST:event_btnManageTeamsActionPerformed
 
+    private void btnPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPassActionPerformed
+        // TODO add your handling code here:
+        connection.sendPass();
+    }//GEN-LAST:event_btnPassActionPerformed
+
+    private void btnPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPauseActionPerformed
+        // TODO add your handling code here:
+        connection.sendTogglePause();
+    }//GEN-LAST:event_btnPauseActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBid;
     private javax.swing.JButton btnManageTeams;
+    private javax.swing.JButton btnPass;
+    private javax.swing.JButton btnPause;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;

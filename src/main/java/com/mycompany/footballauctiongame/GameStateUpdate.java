@@ -20,10 +20,11 @@ public class GameStateUpdate extends Message {
     private String currentBidderName;
     private int secondsRemaining;
     private boolean auctionFinished;
+    private boolean paused;
 
     public GameStateUpdate(ArrayList<Team> teams, ArrayList<Player> availablePlayers,
             Player currentPlayer, double currentBidAmount, String currentBidderName,
-            int secondsRemaining, boolean auctionFinished) {
+            int secondsRemaining, boolean auctionFinished, boolean paused) {
 
         this.teams = teams;
         this.availablePlayers = availablePlayers;
@@ -32,12 +33,15 @@ public class GameStateUpdate extends Message {
         this.currentBidderName = currentBidderName;
         this.secondsRemaining = secondsRemaining;
         this.auctionFinished = auctionFinished;
+        this.paused = paused;
     }
 
     public ArrayList<Team> getTeams() {
         return teams;
     }
 
+    public boolean isPaused() { return paused; }
+    
     public ArrayList<Player> getAvailablePlayers() {
         return availablePlayers;
     }

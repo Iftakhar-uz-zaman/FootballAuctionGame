@@ -31,13 +31,22 @@ public class ClientHandler extends Thread {
 
     public void sendMessage(Message message) {
 
+    try {
+        out.writeObject(message);
+        out.flush();
+    } catch (IOException e) {
+
+        System.out.println((myTeam == null ? "A client" : myTeam.getTeamName())
+                + " appears disconnected — removing.");
+
+        server.removeClient(this);
+
         try {
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            System.out.println("Failed to send to " + (myTeam == null ? "unknown client" : myTeam.getTeamName()));
+            socket.close();
+        } catch (IOException ignored) {
         }
     }
+}
 
     @Override
     public void run() {
@@ -91,7 +100,22 @@ public class ClientHandler extends Thread {
             sendMessage(response);
             server.broadcastState();
 
-        } else if (message instanceof DropPlayerRequest) {
+        }
+        else if (message instanceof PassRequest) {
+
+    ServerResponse response = server.getEngine().pass(myTeam);
+    sendMessage(response);
+    server.broadcastState();
+        }
+        
+        else if (message instanceof TogglePauseRequest) {
+
+    ServerResponse response = server.getEngine().togglePause();
+    sendMessage(response);
+    server.broadcastState();
+
+}
+        else if (message instanceof DropPlayerRequest) {
 
             DropPlayerRequest req = (DropPlayerRequest) message;
 

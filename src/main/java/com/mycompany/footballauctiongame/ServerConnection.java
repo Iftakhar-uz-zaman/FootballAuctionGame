@@ -62,6 +62,14 @@ public void removeListener(GameStateListener listener) {
         send(new BidRequest());
     }
 
+    public void sendPass() {
+    send(new PassRequest());
+}
+    
+    public void sendTogglePause() {
+    send(new TogglePauseRequest());
+}
+    
     public void sendDropPlayer(int playerId) {
         send(new DropPlayerRequest(playerId));
     }

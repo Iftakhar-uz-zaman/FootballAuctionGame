@@ -23,10 +23,55 @@ public class AuctionEngine {
     private Player currentPlayer;
     private Bid currentBid;
     private static final int BID_DURATION_SECONDS = 15;
-private int secondsRemaining;
+    private java.util.HashSet<Team> passedTeams = new java.util.HashSet<>();
+    private int secondsRemaining;
+    private boolean paused = false;
+
+public synchronized ServerResponse togglePause() {
+
+    paused = !paused;
+
+    return new ServerResponse(true, paused ? "Auction paused." : "Auction resumed.");
+}
+
+public boolean isPaused() {
+    return paused;
+}
+    
+    public synchronized ServerResponse pass(Team team) {
+
+    if (auctionFinished()) {
+        return new ServerResponse(false, "Auction has finished.");
+    }
+
+    if (team.equals(currentBid.getBidder())) {
+        return new ServerResponse(false, "You're the highest bidder — you can't pass.");
+    }
+
+    passedTeams.add(team);
+
+    boolean everyoneElsePassedTheBidder =
+            currentBid.getBidder() != null && passedTeams.size() >= teams.size() - 1;
+
+    boolean everyonePassedWithNoBid =
+            currentBid.getBidder() == null && passedTeams.size() >= teams.size();
+
+    if (everyoneElsePassedTheBidder || everyonePassedWithNoBid) {
+        resolveCurrentPlayer();
+    }
+
+    return new ServerResponse(true, team.getTeamName() + " passed.");
+}
 
 public synchronized ServerResponse bid(Team team) {
 
+    if (auctionFinished()) {
+        return new ServerResponse(false, "Auction has finished.");
+    }
+
+    if (passedTeams.contains(team)) {
+        return new ServerResponse(false, "You already passed on this player.");
+    }
     if (auctionFinished()) {
         return new ServerResponse(false, "Auction has finished.");
     }
@@ -144,6 +189,7 @@ private void resolveCurrentPlayer() {
     //proceeds with the next player
     private void nextPlayer() {
         currentPlayerIndex++;
+        passedTeams.clear();
         if (currentPlayerIndex >= players.size()) {
             currentPlayer = null;
             currentBid = null;
