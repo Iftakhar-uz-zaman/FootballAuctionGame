@@ -77,10 +77,14 @@ public void removeListener(GameStateListener listener) {
     public void sendBuyPlayer(int playerId) {
         send(new BuyPlayerRequest(playerId));
     }
+    
+    public void sendSetFormation(String formation) {
+    send(new SetFormationRequest(formation));
+}
 
-    public void sendRunLeague() {
-        send(new RunLeagueRequest());
-    }
+public void sendSetLineupSlot(int slotIndex, Integer playerId) {
+    send(new SetLineupSlotRequest(slotIndex, playerId));
+}
 
     private void send(Message message) {
 

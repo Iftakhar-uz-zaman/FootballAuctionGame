@@ -21,6 +21,28 @@ public class GameServer {
     private AuctionEngine engine;
     private ArrayList<ClientHandler> clients = new ArrayList<>();
     private Object lock = new Object();
+    public ArrayList<String> getConnectedTeamNames() {
+
+    ArrayList<String> names = new ArrayList<>();
+
+    synchronized (lock) {
+
+        for (ClientHandler client : clients) {
+
+            if (client.getMyTeam() != null) {
+                names.add(client.getMyTeam().getTeamName());
+            }
+        }
+    }
+
+    return names;
+}
+    public boolean allTeamsConnected() {
+
+    synchronized (lock) {
+        return clients.size() >= engine.getTeams().size();
+    }
+}
 
     public GameServer(AuctionEngine engine) {
         this.engine = engine;
@@ -75,21 +97,29 @@ public class GameServer {
 
     private GameStateUpdate buildStateUpdate() {
 
-        String bidderName = engine.getCurrentBid() == null || engine.getCurrentBid().getBidder() == null
-                ? "None"
-                : engine.getCurrentBid().getBidder().getTeamName();
+    ArrayList<String> connectedTeamNames = getConnectedTeamNames();
+    boolean allTeamsConnected = connectedTeamNames.size() >= engine.getTeams().size();
 
-        return new GameStateUpdate(
-                engine.getTeams(),
-                engine.getAvailablePlayers(),
-                engine.getCurrentPlayer(),
-                engine.getCurrentBid() == null ? 0 : engine.getCurrentBid().getAmount(),
-                bidderName,
-                engine.getSecondsRemaining(),
-                engine.auctionFinished(),
-                engine.isPaused()
-        );
-    }
+    String bidderName = engine.getCurrentBid() == null || engine.getCurrentBid().getBidder() == null
+            ? "None"
+            : engine.getCurrentBid().getBidder().getTeamName();
+
+    return new GameStateUpdate(
+            engine.getTeams(),
+            engine.getAvailablePlayers(),
+            engine.getCurrentPlayer(),
+            engine.getCurrentBid() == null ? 0 : engine.getCurrentBid().getAmount(),
+            bidderName,
+            engine.getSecondsRemaining(),
+            engine.auctionFinished(),
+            engine.isPaused(),
+            allTeamsConnected,
+            connectedTeamNames,
+            engine.getPassedCount(),
+            engine.getLastPassingTeam(),
+            engine.getResolvedCount(), engine.getLastResolvedPlayerName(), engine.getLastResolvedWinnerName(), engine.getLastResolvedPrice()
+    );
+}
 
     public void start() {
 

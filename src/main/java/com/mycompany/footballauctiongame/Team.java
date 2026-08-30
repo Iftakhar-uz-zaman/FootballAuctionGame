@@ -20,61 +20,95 @@ public class Team implements java.io.Serializable{
     private ArrayList<Player> squad;
     private int droppedCount = 0;
     private int addedCount = 0;
-    private int fanHappiness = 50;
     
-    //returns team chemistry: a parameter which will be used for runnig league simulation
-    public int getChemistry() {
-    if (squad.isEmpty()) {
-        return 50;
+    public static class FormationSlot implements java.io.Serializable {
+
+    public String role;
+    public int xPercent;
+    public int yPercent;
+
+    public FormationSlot(String role, int xPercent, int yPercent) {
+        this.role = role;
+        this.xPercent = xPercent;
+        this.yPercent = yPercent;
     }
-    //team chemistry increases with every positon that is covered (i.e. if a team is missing gk and they add their 1st GK to their squad the chemistry will increase by 5)
-    HashSet<String> positionsCovered = new HashSet<>();
-    for (Player p : squad) {
-        positionsCovered.add(p.getPosition());
+}
+
+private String formation = null;
+private ArrayList<Player> lineup = new ArrayList<>();
+
+public String getFormation() {
+    return formation;
+}
+
+public ArrayList<Player> getLineup() {
+    return lineup;
+}
+
+public static java.util.LinkedHashMap<String, FormationSlot[]> getFormationOptions() {
+
+    java.util.LinkedHashMap<String, FormationSlot[]> formations = new java.util.LinkedHashMap<>();
+
+    formations.put("4-4-2", new FormationSlot[]{
+        new FormationSlot("GK", 50, 90),
+        new FormationSlot("LB", 15, 70), new FormationSlot("CB", 35, 72),
+        new FormationSlot("CB", 65, 72), new FormationSlot("RB", 85, 70),
+        new FormationSlot("LM", 15, 45), new FormationSlot("CM", 38, 48),
+        new FormationSlot("CM", 62, 48), new FormationSlot("RM", 85, 45),
+        new FormationSlot("ST", 38, 15), new FormationSlot("ST", 62, 15)
+    });
+
+    formations.put("4-3-3", new FormationSlot[]{
+        new FormationSlot("GK", 50, 90),
+        new FormationSlot("LB", 15, 70), new FormationSlot("CB", 35, 72),
+        new FormationSlot("CB", 65, 72), new FormationSlot("RB", 85, 70),
+        new FormationSlot("CM", 30, 48), new FormationSlot("CM", 50, 50), new FormationSlot("CM", 70, 48),
+        new FormationSlot("LW", 20, 15), new FormationSlot("ST", 50, 12), new FormationSlot("RW", 80, 15)
+    });
+
+    formations.put("3-5-2", new FormationSlot[]{
+        new FormationSlot("GK", 50, 90),
+        new FormationSlot("CB", 30, 72), new FormationSlot("CB", 50, 75), new FormationSlot("CB", 70, 72),
+        new FormationSlot("LM", 12, 48), new FormationSlot("CM", 32, 50), new FormationSlot("CM", 50, 52),
+        new FormationSlot("CM", 68, 50), new FormationSlot("RM", 88, 48),
+        new FormationSlot("ST", 38, 15), new FormationSlot("ST", 62, 15)
+    });
+
+    return formations;
+}
+
+public void setFormation(String formationName) {
+
+    this.formation = formationName;
+
+    int slotCount = getFormationOptions().get(formationName).length;
+    lineup = new ArrayList<>();
+
+    for (int i = 0; i < slotCount; i++) {
+        lineup.add(null);
     }
-    int chemistry = 50 + (positionsCovered.size() * 5);
-    chemistry -= droppedCount * 3;
-    if (chemistry > 100) {
-        chemistry = 100;
-    }
-    if (chemistry < 0) {
-        chemistry = 0;
-    }
-    return chemistry;
-    }
-    
-    public int getFanHappiness() {    
-        return fanHappiness;
+}
+
+public void setLineupSlot(int slotIndex, Player player) throws PlayerNotFoundException {
+
+    if (formation == null) {
+        throw new PlayerNotFoundException("Select a formation first.");
     }
 
-    //initializes fan happiness condition : another parameter which is being used in league simulation
-    public void initializeFanHappiness() {   
-        if (squad.isEmpty()) {       
-            fanHappiness = 50;        
-            return;    
-        }   
-        int totalOverall = 0;   
-        for (Player p : squad) {        
-            totalOverall += p.getOverall();    
-        }    
-        fanHappiness = totalOverall / squad.size();   
-        if (fanHappiness > 100) {        
-            fanHappiness = 100;    
-        }    
-        if (fanHappiness < 0) {        
-            fanHappiness = 0;    
+    if (player != null && !squad.contains(player)) {
+        throw new PlayerNotFoundException(player.getName() + " is not in " + teamName + "'s squad.");
+    }
+
+    if (player != null) {
+        for (int i = 0; i < lineup.size(); i++) {
+            if (i != slotIndex && player.equals(lineup.get(i))) {
+                lineup.set(i, null); // move the player instead of allowing duplicates
+            }
         }
     }
 
-    public void adjustFanHappiness(int delta) {    
-        fanHappiness += delta;
-        if (fanHappiness > 100) {        
-            fanHappiness = 100;    
-        }    
-        if (fanHappiness < 0) {
-            fanHappiness = 0;    
-        }
-    }
+    lineup.set(slotIndex, player);
+}
 
     //number of players dropped from a team after the auction finishes
     public int getDroppedCount() {
@@ -98,7 +132,12 @@ public class Team implements java.io.Serializable{
         }    
         double refund = player.getCurrentBid() * 0.5;   
         purse += refund;    
-        squad.remove(player);   
+        squad.remove(player);
+        for (int i = 0; i < lineup.size(); i++) {
+    if (player.equals(lineup.get(i))) {
+        lineup.set(i, null);
+    }
+}
         droppedCount++;   
         player.setWinningTeam(null);    
         player.setSold(false);    
@@ -178,19 +217,6 @@ public class Team implements java.io.Serializable{
             total += player.getCurrentBid();
         }
         return total;
-    }
-    
-    //measures team strength for running simulation
-    public double getTeamStrength() {    
-        if (squad.isEmpty()) {       
-            return 0;    
-        }    
-        int totalOverall = 0;   
-        for (Player p : squad) {       
-            totalOverall += p.getOverall();   
-        }    
-        double avgOverall = (double) totalOverall / squad.size();    
-        return (avgOverall * 0.6) + (getChemistry() * 0.2) + (getFanHappiness() * 0.2);
     }
     
     @Override

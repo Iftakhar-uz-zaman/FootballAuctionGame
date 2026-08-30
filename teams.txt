@@ -1,3 +1,8 @@
-Red FC|Alice|1000.0|
-Blue FC|Bob|0.0|Haaland        1000.0
+Dhaka Tuskers|Ifty|50.0|Messi        180.0
+Haaland        150.0
+Pedri        110.0
+Ronaldo        150.0
+Mbappe        140.0
+De Bruyne        120.0
 
+Ifty FC|Zaman|100.0|

@@ -18,7 +18,6 @@ public class AuctionEngine {
     private ArrayList<Player> players;
     private ArrayList<Team> teams;
     private ArrayList<Player> availablePlayers;
-    private String leagueResults = null;
     private int currentPlayerIndex;
     private Player currentPlayer;
     private Bid currentBid;
@@ -26,6 +25,11 @@ public class AuctionEngine {
     private java.util.HashSet<Team> passedTeams = new java.util.HashSet<>();
     private int secondsRemaining;
     private boolean paused = false;
+    private String lastPassingTeam = "None";
+    private int resolvedCount = 0;
+private String lastResolvedPlayerName = null;
+private String lastResolvedWinnerName = null;
+private double lastResolvedPrice = 0;
 
 public synchronized ServerResponse togglePause() {
 
@@ -49,7 +53,7 @@ public boolean isPaused() {
     }
 
     passedTeams.add(team);
-
+    lastPassingTeam = team.getTeamName();
     boolean everyoneElsePassedTheBidder =
             currentBid.getBidder() != null && passedTeams.size() >= teams.size() - 1;
 
@@ -63,6 +67,14 @@ public boolean isPaused() {
     return new ServerResponse(true, team.getTeamName() + " passed.");
 }
 
+    public String getLastPassingTeam() {
+    return lastPassingTeam;
+}
+
+public int getPassedCount() {
+    return passedTeams.size();
+}
+
 public synchronized ServerResponse bid(Team team) {
 
     if (auctionFinished()) {
@@ -72,25 +84,53 @@ public synchronized ServerResponse bid(Team team) {
     if (passedTeams.contains(team)) {
         return new ServerResponse(false, "You already passed on this player.");
     }
-    if (auctionFinished()) {
-        return new ServerResponse(false, "Auction has finished.");
-    }
 
-    double nextPrice = currentBid.getAmount() + 10;
+    boolean isFirstBid = currentBid.getBidder() == null;
+    double nextPrice = isFirstBid ? currentBid.getAmount() : currentBid.getAmount() + 10;
 
     if (!team.canBid(nextPrice)) {
         return new ServerResponse(false, "Not enough purse.");
     }
 
-    currentBid.increaseBid();
+    if (!isFirstBid) {
+        currentBid.increaseBid();
+    }
+
     currentBid.setBidder(team);
 
     currentPlayer.setCurrentBid(currentBid.getAmount());
     currentPlayer.setWinningTeam(team);
 
-    secondsRemaining = BID_DURATION_SECONDS; // any bid resets the clock
+    secondsRemaining = BID_DURATION_SECONDS;
 
-    return new ServerResponse(true, team.getTeamName() + " bids " + currentBid.getAmount());
+    double confirmedAmount = currentBid.getAmount();   // NEW — captured before anything can null it out
+
+    if (noOneElseCanContest(team)) {
+        resolveCurrentPlayer();
+    }
+
+    return new ServerResponse(true, team.getTeamName() + " bids " + confirmedAmount);   // CHANGED
+}
+
+private boolean noOneElseCanContest(Team currentBidder) {
+
+    double nextRequiredBid = currentBid.getAmount() + 10;
+
+    for (Team team : teams) {
+
+        if (team.equals(currentBidder)) {
+            continue;
+        }
+
+        boolean hasPassed = passedTeams.contains(team);
+        boolean canAffordNext = team.canBid(nextRequiredBid);
+
+        if (!hasPassed && canAffordNext) {
+            return false; // this team could still contest — don't resolve yet
+        }
+    }
+
+    return true; // every other team has either passed or can't afford to continue
 }
 
 
@@ -110,9 +150,19 @@ public void tickCountdown() {
 
 private void resolveCurrentPlayer() {
 
+    resolvedCount++;
+    lastResolvedPlayerName = currentPlayer.getName();
+
     if (currentBid.getBidder() != null) {
+
+        lastResolvedWinnerName = currentBid.getBidder().getTeamName();
+        lastResolvedPrice = currentBid.getAmount();
         sellPlayer();
+
     } else {
+
+        lastResolvedWinnerName = null;
+        lastResolvedPrice = 0;
         availablePlayers.add(currentPlayer);
         nextPlayer();
     }
@@ -121,6 +171,11 @@ private void resolveCurrentPlayer() {
         secondsRemaining = BID_DURATION_SECONDS;
     }
 }
+
+public int getResolvedCount() { return resolvedCount; }
+public String getLastResolvedPlayerName() { return lastResolvedPlayerName; }
+public String getLastResolvedWinnerName() { return lastResolvedWinnerName; }
+public double getLastResolvedPrice() { return lastResolvedPrice; }
 
     //runs the auction
     public AuctionEngine(ArrayList<Player> players, ArrayList<Team> teams) {
@@ -132,6 +187,7 @@ private void resolveCurrentPlayer() {
             currentPlayer = players.get(0);
             currentBid = new Bid(null,currentPlayer.getBasePrice());
         }
+        secondsRemaining = BID_DURATION_SECONDS;
     }
 
     public Player getCurrentPlayer() {
@@ -193,9 +249,6 @@ private void resolveCurrentPlayer() {
         if (currentPlayerIndex >= players.size()) {
             currentPlayer = null;
             currentBid = null;
-            for (Team team : teams) {
-            team.initializeFanHappiness();
-            }
             return;
         }
         currentPlayer = players.get(currentPlayerIndex);
@@ -222,63 +275,5 @@ private void resolveCurrentPlayer() {
         }
         System.out.println();
         System.out.println("-----------------------------------");
-    }
-
-    //simulates league after team set up
-    public String simulateLeague() {    
-        if (leagueResults != null) {
-        return leagueResults; //already run — return the same result   
-        }   
-        if (teams.size() < 2) {        
-            return "Need at least 2 teams to run a league.";    
-        }
-        //sets all teams point 0 initially
-        HashMap<Team, Integer> points = new HashMap<>();   
-        for (Team team : teams) {        
-            points.put(team, 0);    
-        }  
-        Random random = new Random();  
-        StringBuilder log = new StringBuilder();   
-        log.append("=== MATCH RESULTS ===\n\n");
-        // Round robin: every team plays every other team once       
-        for (int i = 0; i < teams.size(); i++) {        
-            for (int j = i + 1; j < teams.size(); j++) {           
-                Team home = teams.get(i);           
-                Team away = teams.get(j);           
-                double homeScore = home.getTeamStrength() + random.nextInt(21) - 10;           
-                double awayScore = away.getTeamStrength() + random.nextInt(21) - 10;           
-                log.append(home.getTeamName()).append(" vs ").append(away.getTeamName()).append("  ->  ");           
-                if (homeScore > awayScore) {               
-                    points.put(home, points.get(home) + 3);               
-                    home.adjustFanHappiness(5);               
-                    away.adjustFanHappiness(-5);                
-                    log.append(home.getTeamName()).append(" wins\n");            
-                }
-                else if (awayScore > homeScore) {               
-                    points.put(away, points.get(away) + 3);                
-                    away.adjustFanHappiness(5);                
-                    home.adjustFanHappiness(-5);                
-                    log.append(away.getTeamName()).append(" wins\n");           
-                } 
-                else {               
-                    points.put(home, points.get(home) + 1);               
-                    points.put(away, points.get(away) + 1);               
-                    home.adjustFanHappiness(1);               
-                    away.adjustFanHappiness(1);               
-                    log.append("Draw\n");           
-                }        
-            }   
-        }
-        //shows team standings
-        ArrayList<Team> standings = new ArrayList<>(teams);    
-        standings.sort((t1, t2) -> points.get(t2) - points.get(t1));   
-        log.append("\n=== FINAL STANDINGS ===\n\n");   
-        int rank = 1;    
-        for (Team team : standings) {      
-            log.append(rank).append(". ").append(team.getTeamName()).append(" - ").append(points.get(team)).append(" pts  (Fan Happiness: ").append(team.getFanHappiness()).append(")\n");       
-            rank++;   
-        }   
-        leagueResults = log.toString();   
-        return leagueResults;
     }
 }

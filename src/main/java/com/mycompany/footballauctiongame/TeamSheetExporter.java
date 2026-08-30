@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
 
 public class TeamSheetExporter {
     // writes the team info on a text file for a manager to download
@@ -29,6 +30,23 @@ public class TeamSheetExporter {
             writer.newLine();
             writer.write("Players Added: " + team.getAddedCount());
             writer.newLine();
+            writer.write("Formation: " + (team.getFormation() == null ? "Not set" : team.getFormation()));
+writer.newLine();
+
+if (team.getFormation() != null) {
+
+    Team.FormationSlot[] slots = Team.getFormationOptions().get(team.getFormation());
+    ArrayList<Player> lineup = team.getLineup();
+
+    for (int i = 0; i < slots.length; i++) {
+
+        Player p = i < lineup.size() ? lineup.get(i) : null;
+        writer.write(slots[i].role + ": " + (p == null ? "-" : p.getName()));
+        writer.newLine();
+    }
+}
+
+writer.newLine();
             writer.newLine();
             writer.write("Squad:");
             writer.newLine();

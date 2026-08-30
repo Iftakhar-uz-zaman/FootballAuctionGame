@@ -11,6 +11,7 @@ package com.mycompany.footballauctiongame;
 // ClientHandler.java
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class ClientHandler extends Thread {
 
@@ -29,9 +30,10 @@ public class ClientHandler extends Thread {
         return myTeam;
     }
 
-    public void sendMessage(Message message) {
+    public synchronized void sendMessage(Message message) {
 
     try {
+        out.reset();
         out.writeObject(message);
         out.flush();
     } catch (IOException e) {
@@ -79,9 +81,17 @@ public class ClientHandler extends Thread {
             // Main loop: keep handling requests until disconnect
             while (true) {
 
-                Object message = in.readObject();
-                handleMessage(message);
-            }
+    Object message = in.readObject();
+
+    try {
+        handleMessage(message);
+    } catch (Exception e) {
+        System.out.println("Error handling message from "
+                + (myTeam == null ? "unknown" : myTeam.getTeamName()) + ": " + e.getMessage());
+        e.printStackTrace();
+        sendMessage(new ServerResponse(false, "Server error processing your request."));
+    }
+}
 
         } catch (EOFException | java.net.SocketException e) {
             System.out.println((myTeam == null ? "A client" : myTeam.getTeamName()) + " disconnected.");
@@ -89,6 +99,7 @@ public class ClientHandler extends Thread {
             System.out.println("Connection error: " + e.getMessage());
         } finally {
             server.removeClient(this);
+            server.broadcastState();
         }
     }
 
@@ -96,17 +107,27 @@ public class ClientHandler extends Thread {
 
         if (message instanceof BidRequest) {
 
-            ServerResponse response = server.getEngine().bid(myTeam);
-            sendMessage(response);
-            server.broadcastState();
+    if (!server.allTeamsConnected()) {
+        sendMessage(new ServerResponse(false, "Waiting for all managers to connect."));
+        return;
+    }
 
-        }
-        else if (message instanceof PassRequest) {
+    ServerResponse response = server.getEngine().bid(myTeam);
+    sendMessage(response);
+    server.broadcastState();
+
+} else if (message instanceof PassRequest) {
+
+    if (!server.allTeamsConnected()) {
+        sendMessage(new ServerResponse(false, "Waiting for all managers to connect."));
+        return;
+    }
 
     ServerResponse response = server.getEngine().pass(myTeam);
     sendMessage(response);
     server.broadcastState();
-        }
+
+}
         
         else if (message instanceof TogglePauseRequest) {
 
@@ -145,10 +166,32 @@ public class ClientHandler extends Thread {
 
             server.broadcastState();
 
-        } else if (message instanceof RunLeagueRequest) {
+        } else if (message instanceof SetFormationRequest) {
 
-            String results = server.getEngine().simulateLeague();
-            sendMessage(new ServerResponse(true, results));
-        }
+    SetFormationRequest req = (SetFormationRequest) message;
+    myTeam.setFormation(req.getFormation());
+    sendMessage(new ServerResponse(true, "Formation set to " + req.getFormation()));
+    server.broadcastState();
+
+} else if (message instanceof SetLineupSlotRequest) {
+
+    SetLineupSlotRequest req = (SetLineupSlotRequest) message;
+
+    try {
+
+        Player player = req.getPlayerId() == null
+                ? null
+                : server.findPlayerById(myTeam.getSquad(), req.getPlayerId());
+
+        myTeam.setLineupSlot(req.getSlotIndex(), player);
+        sendMessage(new ServerResponse(true, player == null ? "Slot cleared." : player.getName() + " placed."));
+
+    } catch (PlayerNotFoundException e) {
+        sendMessage(new ServerResponse(false, e.getMessage()));
+    }
+
+    server.broadcastState();
+
+}
     }
 }

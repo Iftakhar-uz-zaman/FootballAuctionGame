@@ -8,11 +8,21 @@ package com.mycompany.footballauctiongame;
  *
  * @author Lenovo
  */
-// RunLeagueRequest.java
-public class RunLeagueRequest extends Message {
+// SetFormationRequest.java
+public class SetFormationRequest extends Message {
+
+    private String formation;
+
+    public SetFormationRequest(String formation) {
+        this.formation = formation;
+    }
+
+    public String getFormation() {
+        return formation;
+    }
 
     @Override
     public String describe() {
-        return "Run league simulation request";
+        return "Set formation: " + formation;
     }
 }
